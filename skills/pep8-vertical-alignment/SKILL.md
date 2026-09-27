@@ -52,11 +52,7 @@ result = calculate_total(
     tax)
 ```
 
-### 3. Line length
-
-No fixed limit for now. Resolved in the future.
-
-### 4. Chained method calls (fluent API)
+### 3. Chained method calls (fluent API)
 
 Align with the dot. No enclosing parentheses.
 
@@ -72,7 +68,7 @@ result = (df
           .groupby(col))
 ```
 
-### 5. Binary operators in multi-line
+### 4. Binary operators in multi-line
 
 Parentheses are MANDATORY. Operator at the START of each continuation line.
 Backslash `\` for line continuation is PROHIBITED.
@@ -93,7 +89,7 @@ result = condition_one \
          and condition_two
 ```
 
-### 6. Closing bracket
+### 5. Closing bracket
 
 Closing bracket goes at the END of the last item, not on its own line.
 
@@ -110,7 +106,7 @@ config = {host: "localhost",
           }
 ```
 
-### 7. Strings are always on a single line
+### 6. Strings are always on a single line
 
 Strings must NOT be split across multiple lines. Implicit string
 concatenation inside parentheses is PROHIBITED.
@@ -124,7 +120,7 @@ message = ("Lorem ipsum dolor sit amet "
            "consectetur adipiscing elit")
 ```
 
-### 8. If/for/with/while multi-line
+### 7. If/for/with/while multi-line
 
 Use parentheses with vertical alignment. Operator at start of line.
 
@@ -147,10 +143,6 @@ if (user.is_active
     and user.role == "admin"):
     grant_access()
 ```
-
-### 9. Variable and function names in examples
-
-All example names, variables, functions, and classes MUST be in English.
 
 ## Review flow
 
