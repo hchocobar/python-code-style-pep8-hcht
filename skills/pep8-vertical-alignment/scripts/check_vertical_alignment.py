@@ -81,8 +81,10 @@ def check_split_strings(lines: list[str]) -> list[str]:
             continue
         prev = lines[i - 1].rstrip('\n').strip()
         curr = line.rstrip('\n').strip()
+        string_prefix = r'(?:[fFrRbBuU]+)?'
         if (re.search(r'["\'](?:[^"\'\\]|\\.)*["\']\s*$', prev)
-                and re.search(r'^["\'](?:[^"\'\\]|\\.)*["\']', curr)
+                and re.search(r'^' + string_prefix + r'["\']'
+                              r'(?:[^"\'\\]|\\.)*["\']', curr)
                 and not prev.endswith('\\')
                 and not prev.startswith('#')):
             violations.append(
