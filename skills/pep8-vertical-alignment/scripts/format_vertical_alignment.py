@@ -107,10 +107,7 @@ def fix_operator_position(source: str) -> str:
         Code with operators positioned at start of continuation line.
     """
     lines = source.splitlines(keepends=True)
-    operators_re = re.compile(
-        r'\b(and|or|not)\b$|'
-        r'[\+\-\*\/\%\&\|\^]=?$|==$|!=$|<=$|>=$|<<$|>>$'
-    )
+    operators_re = re.compile(r'\b(and|or|not)\b$|[\\+\\-\\*\\/\\%\\&\\|\\^]=?$|==$|!=$|<=$|>=$|<<$|>>$')
     result: list[str] = []
     i = 0
     while i < len(lines):

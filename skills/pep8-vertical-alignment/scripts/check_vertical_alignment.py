@@ -28,8 +28,7 @@ def check_backslash(lines: list[str]) -> list[str]:
     for i, line in enumerate(lines):
         stripped = line.rstrip('\n').rstrip()
         if stripped.endswith('\\') and not stripped.startswith('#'):
-            violations.append(f"{i + 1}: Backslash line continuation is "
-                              f"prohibited. Use parentheses instead")
+            violations.append(f"{i + 1}: Backslash line continuation is prohibited. Use parentheses instead")
     return violations
 
 
@@ -55,10 +54,7 @@ def check_closing_bracket_own_line(lines: list[str]) -> list[str]:
                 prev = lines[i - 1].rstrip('\n').strip()
                 if prev and prev not in (
                         ')', ']', '}', '),', '],', '},'):
-                    violations.append(
-                        f"{i + 1}: Closing bracket should be at the end "
-                        f"of the last item, not on its own line"
-                    )
+                    violations.append(f"{i + 1}: Closing bracket should be at the end of the last item, not on its own line")
     return violations
 
 
@@ -82,15 +78,11 @@ def check_split_strings(lines: list[str]) -> list[str]:
         prev = lines[i - 1].rstrip('\n').strip()
         curr = line.rstrip('\n').strip()
         string_prefix = r'(?:[fFrRbBuU]+)?'
-        if (re.search(r'["\'](?:[^"\'\\]|\\.)*["\']\s*$', prev)
-                and re.search(r'^' + string_prefix + r'["\']'
-                              r'(?:[^"\'\\]|\\.)*["\']', curr)
-                and not prev.endswith('\\')
+        if (re.search(r'["\'](?:[^"\'\\\\]|\\.)*["\']\s*$', prev)
+                and re.search(r'^' + string_prefix + r'["\'](?:[^"\'\\\\]|\\.)*["\']', curr)
+                and not prev.endswith('\\\\')
                 and not prev.startswith('#')):
-            violations.append(
-                f"{i + 1}: Split string detected (implicit "
-                f"concatenation). Strings must be on a single line"
-            )
+            violations.append(f"{i + 1}: Split string detected (implicit concatenation). Strings must be on a single line")
     return violations
 
 
@@ -119,11 +111,7 @@ def check_operator_at_end(lines: list[str]) -> list[str]:
             if tokens:
                 last = tokens[-1].rstrip(',;')
                 if last in operators:
-                    violations.append(
-                        f"{i + 1}: Binary operator '{last}' at end of "
-                        f"line. Operators must go at the start of the "
-                        f"continuation line"
-                    )
+                    violations.append(f"{i + 1}: Binary operator '{last}' at end of line. Operators must go at the start of the continuation line")
     return violations
 
 
@@ -162,11 +150,7 @@ def check_multiline_hanging_indent(tree: ast.AST,
                 indent = len(lines[first_line - 1]) - len(
                     lines[first_line - 1].lstrip())
                 if indent == 4:
-                    violations.append(
-                        f"{first_line}: Hanging indent in function "
-                        f"'{node.name}' parameters. Use vertical "
-                        f"alignment with opening delimiter"
-                    )
+                    violations.append(f"{first_line}: Hanging indent in function '{node.name}' parameters. Use vertical alignment with opening delimiter")
 
         # Check function calls with arguments on next line
         if isinstance(node, ast.Call):
@@ -183,11 +167,7 @@ def check_multiline_hanging_indent(tree: ast.AST,
                             func_name = node.func.id
                         else:
                             func_name = "function"
-                        violations.append(
-                            f"{first_arg_line}: Hanging indent in "
-                            f"'{func_name}' call arguments. Use "
-                            f"vertical alignment"
-                        )
+                        violations.append(f"{first_arg_line}: Hanging indent in '{func_name}' call arguments. Use vertical alignment")
 
         # Check list/dict/set with items on next line
         if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
@@ -203,10 +183,7 @@ def check_multiline_hanging_indent(tree: ast.AST,
                         container = {ast.List: "list", ast.Tuple: "tuple",
                                       ast.Set: "set", ast.Dict: "dict"}
                         name = container.get(type(node), "container")
-                        violations.append(
-                            f"{first_item.lineno}: Hanging indent in "
-                            f"{name} items. Use vertical alignment"
-                        )
+                        violations.append(f"{first_item.lineno}: Hanging indent in {name} items. Use vertical alignment")
 
                     # For dict, also check keys
                     if isinstance(node, ast.Dict) and node.keys:
@@ -215,10 +192,7 @@ def check_multiline_hanging_indent(tree: ast.AST,
                             line_text = lines[first_key.lineno - 1]
                             indent = len(line_text) - len(line_text.lstrip())
                             if indent == 4:
-                                violations.append(
-                                    f"{first_key.lineno}: Hanging indent in "
-                                    f"dict keys. Use vertical alignment"
-                                )
+                                violations.append(f"{first_key.lineno}: Hanging indent in dict keys. Use vertical alignment")
 
     return violations
 
