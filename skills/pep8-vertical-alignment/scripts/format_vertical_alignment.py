@@ -76,8 +76,7 @@ def fix_closing_bracket(source: str) -> str:
         # Check if this line is just a closing bracket
         if text in (')', ']', '}', '),', '],', '},') and i > 0:
             prev_line = result[-1].rstrip('\n')
-            if prev_line.strip() and prev_line.strip() not in (
-                    ')', ']', '}', '),', '],', '},'):
+            if prev_line.strip() and prev_line.strip() not in (')', ']', '}', '),', '],', '},'):
                 # Get the indentation of the line with content
                 indent = len(stripped) - len(text)
                 bracket = text.rstrip(',')
@@ -254,8 +253,7 @@ def fix_split_strings(source: str) -> str:
                     new_prev += merged
                     # Preserve any trailing part of previous line
                     # (like comma if present in implicit concat)
-                    after_prev_str = prev_text[prev_text.rfind(
-                        prev_match.group(1)) + len(prev_match.group(1)):]
+                    after_prev_str = prev_text[prev_text.rfind(prev_match.group(1)) + len(prev_match.group(1)):]
                     if not after_prev_str:
                         result[-1] = new_prev + '\n'
                     else:
