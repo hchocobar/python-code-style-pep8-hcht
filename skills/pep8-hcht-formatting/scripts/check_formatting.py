@@ -81,11 +81,13 @@ def check_blank_lines(lines: list[str]) -> list[str]:
         Violation descriptions.
     """
     violations: list[str] = []
-    # Check trailing newline
-    if not lines or not lines[-1].endswith('\n'):
+    # Check trailing newline and trailing blank line
+    if not lines:
+        violations.append('File is empty')
+    elif not lines[-1].endswith('\n'):
         violations.append(f'{len(lines)}: File must end with a trailing newline')
-    elif len(lines) > 1:
-        # Find the last non-blank content line
+    else:
+        # File ends with newline, now check for trailing blank line
         last_content = -1
         for i in range(len(lines) - 1, -1, -1):
             if lines[i].strip():
