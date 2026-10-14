@@ -54,8 +54,9 @@ class SampleClass:
         pass
 ```
 
-Always leave a single trailing newline at the end of every `.py` file.
-Do NOT leave trailing blank lines (empty lines) after the last code.
+Always leave a trailing blank line after the last code in every `.py` file.
+The file must end with a single blank line (empty line) following the final
+newline.
 
 ### 2. Whitespace around binary operators
 

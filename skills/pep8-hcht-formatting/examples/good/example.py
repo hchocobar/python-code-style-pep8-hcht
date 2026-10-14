@@ -43,3 +43,4 @@ warning = "It's dangerous to go alone!"
 def process() -> None:
     """Process data. Single blank line inside a class method is correct."""
     print('Processing...')
+

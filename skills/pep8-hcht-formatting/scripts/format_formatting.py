@@ -22,8 +22,8 @@ def fix_blank_lines(source: str) -> str:
     str
         Code with blank lines normalised.
     """
-    # Ensure single trailing newline
-    source = source.rstrip('\n') + '\n'
+    # Ensure single trailing newline followed by a blank line
+    source = source.rstrip('\n') + '\n\n'
 
     # Collapse 3+ consecutive blank lines to 2
     source = re.sub(r'\n{4,}', '\n\n\n', source)
@@ -242,3 +242,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+

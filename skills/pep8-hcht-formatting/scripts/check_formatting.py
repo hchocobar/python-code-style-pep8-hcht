@@ -85,14 +85,18 @@ def check_blank_lines(lines: list[str]) -> list[str]:
     if not lines or not lines[-1].endswith('\n'):
         violations.append(f'{len(lines)}: File must end with a trailing newline')
     elif len(lines) > 1:
-        trailing_blanks = 0
-        for i in range(len(lines) - 2, -1, -1):
-            if lines[i].strip() == '':
-                trailing_blanks += 1
-            else:
+        # Find the last non-blank content line
+        last_content = -1
+        for i in range(len(lines) - 1, -1, -1):
+            if lines[i].strip():
+                last_content = i
                 break
-        if trailing_blanks > 0:
-            violations.append(f'{len(lines)}: File has {trailing_blanks} extra trailing blank line(s)')
+        if last_content >= 0:
+            trailing_blanks = len(lines) - last_content - 1
+            if trailing_blanks == 0:
+                violations.append(f'{len(lines)}: Expected 1 trailing blank line, found 0')
+            elif trailing_blanks > 1:
+                violations.append(f'{len(lines)}: Expected 1 trailing blank line, found {trailing_blanks}')
     # Check leading blanks at the start of the file
     violations.extend(check_leading_blanks(lines))
     # Use AST for blank line count between definitions
@@ -276,3 +280,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
