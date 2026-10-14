@@ -44,18 +44,15 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
         Violation descriptions.
     """
     violations: list[str] = []
-
     # Find the first non-blank line
     first_non_blank = 0
     for i, line in enumerate(lines):
         if line.strip():
             first_non_blank = i
             break
-
     if first_non_blank > 0:
         for i in range(first_non_blank):
             violations.append(f'{i + 1}: Blank line at the start of the file')
-
     return violations
 
 
@@ -73,7 +70,6 @@ def check_blank_lines(lines: list[str]) -> list[str]:
         Violation descriptions.
     """
     violations: list[str] = []
-
     # Check trailing newline
     if not lines or not lines[-1].endswith('\n'):
         violations.append(f'{len(lines)}: File must end with a trailing newline')
@@ -86,33 +82,26 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                 break
         if trailing_blanks > 0:
             violations.append(f'{len(lines)}: File has {trailing_blanks} extra trailing blank line(s)')
-
     # Check leading blanks at the start of the file
     violations.extend(check_leading_blanks(lines))
-
     # Use AST for blank line count between definitions
     source = ''.join(lines)
     try:
         tree = ast.parse(source)
     except SyntaxError:
         return violations
-
     method_lines = _collect_methods(tree)
-
     for node in ast.walk(tree):
         if not isinstance(node, ast.Module):
             continue
-
         prev_end: int | None = None
         for child in node.body:
             if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef,
                                       ast.ClassDef)):
                 prev_end = _item_last_line(child)
                 continue
-
             lineno = child.lineno
             is_method = child.lineno in method_lines
-
             if prev_end is not None:
                 gap = lineno - prev_end - 1
                 if is_method:
@@ -122,7 +111,6 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                     if gap != 2:
                         violations.append(f'{lineno}: Expected 2 blank lines before top-level \'{child.name}\', found {gap}')
             prev_end = _item_last_line(child)
-
     return violations
 
 
@@ -141,38 +129,31 @@ def check_operator_whitespace(lines: list[str]) -> list[str]:
     """
     violations: list[str] = []
     in_docstring = False
-
     patterns = [re.compile(r'[^\s=!<>]=[^\s=]'),
                 re.compile(r'[^\s<>!]={1,2}[^\s=]'),
                 re.compile(r'[^\s<]<=[^\s=]'),
                 re.compile(r'[^\s>]>=[^\s=]'),
                 re.compile(r'[^\s][+\-*/%][^\s]'),
                 re.compile(r'[^\s][&|^][^\s]')]
-
     for i, line in enumerate(lines):
         stripped = line.rstrip('\n')
         text = stripped.strip()
-
         if text.startswith('"""') or text.startswith("'''"):
             if text.count('"""') == 2 or text.count("'''") == 2:
                 continue
             elif not text.endswith('"""') and not text.endswith("'''"):
                 in_docstring = not in_docstring
                 continue
-
         if in_docstring:
             if text.endswith('"""') or text.endswith("'''"):
                 in_docstring = False
             continue
-
         if not text or text.startswith('#'):
             continue
-
         cleaned = _remove_strings(stripped)
         in_comment = cleaned.find('#')
         if in_comment >= 0:
             cleaned = cleaned[:in_comment]
-
         for pat in patterns:
             match = pat.search(cleaned)
             if match:
@@ -181,7 +162,6 @@ def check_operator_whitespace(lines: list[str]) -> list[str]:
                 if op:
                     violations.append(f"{i + 1}: Operator '{op.group()}' without surrounding whitespace")
                 break
-
     return violations
 
 
@@ -209,16 +189,13 @@ def check_quote_style(lines: list[str]) -> list[str]:
     """
     violations: list[str] = []
     double_q = re.compile(r'"[^"\n]*?"')
-
     for i, line in enumerate(lines):
         stripped = line.rstrip('\n')
         text = stripped.strip()
-
         if text.startswith('"""') or text == '"""':
             continue
         if text.startswith('#'):
             continue
-
         matches = double_q.finditer(stripped)
         for m in matches:
             content = m.group()
@@ -226,7 +203,6 @@ def check_quote_style(lines: list[str]) -> list[str]:
             if "'" in inner:
                 continue
             violations.append(f"{i + 1}: Use single quotes instead of double quotes: {content}")
-
     return violations
 
 
@@ -246,7 +222,6 @@ def check_file(filepath: Path) -> list[str]:
     violations: list[str] = []
     source = filepath.read_text(encoding='utf-8')
     lines = source.splitlines(keepends=True)
-
     try:
         violations.extend(check_blank_lines(lines))
         violations.extend(check_operator_whitespace(lines))
@@ -254,7 +229,6 @@ def check_file(filepath: Path) -> list[str]:
     except SyntaxError as e:
         violations.append(f'Syntax error: {e}')
         return violations
-
     return violations
 
 
@@ -263,14 +237,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         print('Usage: python check_formatting.py <file.py>')
         sys.exit(1)
-
     filepath = Path(sys.argv[1])
     if not filepath.exists():
         print(f'File not found: {filepath}')
         sys.exit(1)
-
     violations = check_file(filepath)
-
     if not violations:
         print('No violations found.')
     else:
