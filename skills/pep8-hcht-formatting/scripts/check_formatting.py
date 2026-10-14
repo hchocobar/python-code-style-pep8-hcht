@@ -43,12 +43,10 @@ def _is_docstring_node(node: ast.AST) -> bool:
 
 def check_leading_blanks(lines: list[str]) -> list[str]:
     """Check no blank lines at the start of the file (Rule 4).
-
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
-
     Returns
     -------
     list[str]
@@ -69,12 +67,10 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
 
 def check_blank_lines(lines: list[str]) -> list[str]:
     """Check blank line rules (Rule 1).
-
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
-
     Returns
     -------
     list[str]
@@ -134,17 +130,49 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                         violations.append(f'{lineno}: Expected 2 blank lines before top-level \'{child.name}\', found {gap}')
             prev_end = _item_last_line(child)
             prev_was_docstring = False
+    # Check blank lines inside function bodies
+    violations.extend(check_function_internal_blanks(tree, lines))
+    return violations
+
+
+def check_function_internal_blanks(tree: ast.AST,
+                                   lines: list[str]) -> list[str]:
+    """Check for blank lines inside function bodies (Rule 1).
+    Parameters
+    ----------
+    tree : ast.AST
+        Parsed AST of the source.
+    lines : list[str]
+        Source lines with line endings preserved.
+    Returns
+    -------
+    list[str]
+        Violation descriptions.
+    """
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        body = node.body
+        if not body:
+            continue
+        first = body[0].lineno
+        last = _item_last_line(body[-1])
+        for lineno in range(first, last + 1):
+            idx = lineno - 1
+            if idx < len(lines) and lines[idx].strip() == '':
+                violations.append(
+                    f'{lineno}: Blank line inside function ' +
+                    f"'{node.name}'")
     return violations
 
 
 def check_operator_whitespace(lines: list[str]) -> list[str]:
     """Check whitespace around binary operators (Rule 2).
-
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
-
     Returns
     -------
     list[str]
@@ -199,12 +227,10 @@ def _remove_strings(line: str) -> str:
 
 def check_quote_style(lines: list[str]) -> list[str]:
     """Check quote style (Rule 3): prefer single quotes.
-
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
-
     Returns
     -------
     list[str]
@@ -231,12 +257,10 @@ def check_quote_style(lines: list[str]) -> list[str]:
 
 def check_file(filepath: Path) -> list[str]:
     """Analyzes file and returns list of style violations.
-
     Parameters
     ----------
     filepath : Path
         Path to the Python file to check.
-
     Returns
     -------
     list[str]
