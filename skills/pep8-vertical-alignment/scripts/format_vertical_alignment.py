@@ -12,12 +12,10 @@ from pathlib import Path
 
 def remove_backslash(source: str) -> str:
     """Replace backslash continuations with parenthesized form.
-
     Parameters
     ----------
     source : str
         Source code to transform.
-
     Returns
     -------
     str
@@ -55,12 +53,10 @@ def remove_backslash(source: str) -> str:
 
 def fix_closing_bracket(source: str) -> str:
     """Move closing bracket from its own line to end of last item.
-
     Parameters
     ----------
     source : str
         Source code to transform.
-
     Returns
     -------
     str
@@ -94,12 +90,10 @@ def fix_closing_bracket(source: str) -> str:
 
 def fix_operator_position(source: str) -> str:
     """Move binary operators from end of line to start of next.
-
     Parameters
     ----------
     source : str
         Source code to transform.
-
     Returns
     -------
     str
@@ -153,14 +147,11 @@ def fix_operator_position(source: str) -> str:
 
 def fix_hanging_indent(source: str) -> str:
     """Convert hanging indent (4-space fixed) to vertical alignment.
-
     This is a best-effort heuristic. Complex cases may need manual review.
-
     Parameters
     ----------
     source : str
         Source code to transform.
-
     Returns
     -------
     str
@@ -214,12 +205,10 @@ def fix_hanging_indent(source: str) -> str:
 
 def fix_split_strings(source: str) -> str:
     """Rejoin split strings (implicit concatenation) into single lines.
-
     Parameters
     ----------
     source : str
         Source code to transform.
-
     Returns
     -------
     str
@@ -267,12 +256,10 @@ def fix_split_strings(source: str) -> str:
 
 def format_file(filepath: Path) -> bool:
     """Applies style corrections to the given file.
-
     Parameters
     ----------
     filepath : Path
         Path to the Python file to format.
-
     Returns
     -------
     bool
@@ -280,17 +267,14 @@ def format_file(filepath: Path) -> bool:
     """
     source = filepath.read_text(encoding="utf-8")
     original = source
-
     # Apply transformations in order
     source = remove_backslash(source)
     source = fix_closing_bracket(source)
     source = fix_operator_position(source)
     source = fix_hanging_indent(source)
     source = fix_split_strings(source)
-
     if source == original:
         return False
-
     filepath.write_text(source, encoding="utf-8")
     return True
 
@@ -300,14 +284,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python format_vertical_alignment.py <file.py>")
         sys.exit(1)
-
     filepath = Path(sys.argv[1])
     if not filepath.exists():
         print(f"File not found: {filepath}")
         sys.exit(1)
-
     changed = format_file(filepath)
-
     if changed:
         print(f"Formatted: {filepath}")
     else:
