@@ -1,10 +1,10 @@
 ---
 name: pep8-hcht-formatting
-description: "Enforce consistent formatting rules: blank lines between functions/classes, single spaces around binary operators, and single quotes for strings. Use when reviewing or formatting Python code to ensure readability and uniformity."
-description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
+description: "Enforce consistent formatting rules: blank lines between functions/classes, no leading blank lines, single spaces around binary operators, and single quotes for strings. Use when reviewing or formatting Python code to ensure readability and uniformity."
+description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, sin lineas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.0"
+  version: "1.1"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -118,11 +118,33 @@ message = f"Hello, {name}!"
 config = {"host": "localhost", "port": 8080}
 ```
 
+### 4. No leading blank lines
+
+The file must not start with blank lines. The first non-blank content
+(docstring, code, or comment) must appear on line 1.
+
+```python
+# Correct
+"""Module docstring."""
+
+def func() -> None:
+    pass
+
+# Incorrect — blank lines at the start of the file
+
+
+"""Module docstring."""
+
+def func() -> None:
+    pass
+```
+
 ## Review flow
 
-1. Check blank lines: 2 between top-level defs/classes, 1 between methods.
-2. Check whitespace: spaces around all binary operators.
-3. Check quotes: single quotes everywhere, double only when needed.
+1. Check leading blanks: no blank lines at the start of the file.
+2. Check blank lines: 2 between top-level defs/classes, 1 between methods.
+3. Check whitespace: spaces around all binary operators.
+4. Check quotes: single quotes everywhere, double only when needed.
 
 ## Known limitations
 

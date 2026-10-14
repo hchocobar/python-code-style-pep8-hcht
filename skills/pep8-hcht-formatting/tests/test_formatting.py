@@ -102,6 +102,35 @@ class TestChecker:
         assert quote_found, (
             f'Expected quote violation, got: {violations}')
 
+    def test_leading_blank_lines(self) -> None:
+        """Rule 4: detect blank lines at the start of the file."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write('\n\n\n"""Module docstring."""\n')
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        blank_found = any('blank line at the start' in v.lower()
+                          for v in violations)
+        assert blank_found, (
+            f'Expected leading blank line violation, got: {violations}')
+        # Should flag exactly 3 lines
+        leading_count = sum(1 for v in violations
+                            if 'blank line at the start' in v.lower())
+        assert leading_count == 3, (
+            f'Expected 3 leading blank violations, got {leading_count}: {violations}')
+
+    def test_no_false_positive_leading_blanks(self) -> None:
+        """Good example should not trigger leading blank violations."""
+        violations = check_file(
+            Path(__file__).resolve().parent.parent
+            / 'examples' / 'good' / 'example.py')
+        leading = [v for v in violations
+                   if 'blank line at the start' in v.lower()]
+        assert len(leading) == 0, (
+            f'Expected 0 leading blank violations, got: {leading}')
+
 
 class TestFormatter:
     """Tests for the formatter script."""
