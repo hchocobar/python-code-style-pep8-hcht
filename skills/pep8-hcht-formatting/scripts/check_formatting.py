@@ -4,7 +4,6 @@
 Usage:
     python check_formatting.py <file.py>
 """
-
 import ast
 import re
 import sys
@@ -28,6 +27,18 @@ def _item_last_line(node: ast.AST) -> int:
     if hasattr(node, 'end_lineno') and node.end_lineno is not None:
         last = node.end_lineno
     return last
+
+
+def _is_docstring_node(node: ast.AST) -> bool:
+    """Check if an AST node is a module-level docstring expression."""
+    if isinstance(node, ast.Expr):
+        val = None
+        if isinstance(node.value, ast.Constant):
+            val = node.value.value
+        elif isinstance(node.value, ast.Str):
+            val = node.value.s
+        return isinstance(val, str)
+    return False
 
 
 def check_leading_blanks(lines: list[str]) -> list[str]:
@@ -95,9 +106,11 @@ def check_blank_lines(lines: list[str]) -> list[str]:
         if not isinstance(node, ast.Module):
             continue
         prev_end: int | None = None
+        prev_was_docstring = False
         for child in node.body:
             if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef,
                                       ast.ClassDef)):
+                prev_was_docstring = _is_docstring_node(child)
                 prev_end = _item_last_line(child)
                 continue
             lineno = child.lineno
@@ -107,10 +120,14 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                 if is_method:
                     if gap != 1:
                         violations.append(f'{lineno}: Expected 1 blank line before method \'{child.name}\', found {gap}')
+                elif prev_was_docstring:
+                    if gap != 1:
+                        violations.append(f'{lineno}: Expected 1 blank line before top-level \'{child.name}\' after docstring, found {gap}')
                 else:
                     if gap != 2:
                         violations.append(f'{lineno}: Expected 2 blank lines before top-level \'{child.name}\', found {gap}')
             prev_end = _item_last_line(child)
+            prev_was_docstring = False
     return violations
 
 

@@ -4,7 +4,6 @@
 This file demonstrates correct style for pep8-hcht-formatting rules.
 """
 
-
 def load_config(path: str) -> dict:
     """Load configuration from file."""
     return {'host': 'localhost', 'port': 8080, 'debug': False}

@@ -4,7 +4,6 @@
 Usage:
     python format_formatting.py <file.py>
 """
-
 import re
 import sys
 from pathlib import Path

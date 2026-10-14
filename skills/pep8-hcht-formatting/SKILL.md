@@ -4,7 +4,7 @@ description: "Enforce consistent formatting rules: blank lines between functions
 description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, sin lineas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.1"
+  version: "1.2"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -20,15 +20,22 @@ looks, making it predictable and easier to read.
 
 Top-level functions and classes are separated by **two blank lines**.
 Methods inside a class are separated by **one blank line**.
-Everything else by one.
 
-Do NOT use extra blank lines to group related functions together.
 Do NOT use blank lines to separate logical segments within a function.
+Do NOT use blank lines to group related functions together.
 
-Always leave a single trailing newline at the end of every `.py` file.
+Between a module-level docstring and the first definition, exactly
+**one blank line** is expected. The docstring close must be followed
+immediately by the next line of code without an extra blank line:
 
 ```python
-# Correct
+# Correct — 1 blank line after docstring, then first function
+"""Module docstring."""
+
+def first_function() -> None:
+    pass
+
+# Correct — 2 blank lines between top-level functions, no blank inside
 def first_function() -> None:
     pass
 
@@ -45,32 +52,10 @@ class SampleClass:
 
     def second_method(self) -> None:
         pass
-
-# Incorrect — only one blank line between top-level functions
-def first_function() -> None:
-    pass
-
-def second_function() -> None:
-    pass
-
-# Incorrect — extra blank line to group related functions
-def load_users() -> None:
-    pass
-
-
-def load_products() -> None:
-    pass
-
-
-def load_orders() -> None:
-    pass
-
-# Incorrect — blank line inside a function
-def process() -> None:
-    setup()
-
-    do_work()
 ```
+
+Always leave a single trailing newline at the end of every `.py` file.
+Do NOT leave trailing blank lines (empty lines) after the last code.
 
 ### 2. Whitespace around binary operators
 
@@ -142,18 +127,19 @@ def func() -> None:
 ## Review flow
 
 1. Check leading blanks: no blank lines at the start of the file.
-2. Check blank lines: 2 between top-level defs/classes, 1 between methods.
+2. Check blank lines: 1 blank line after docstring, 2 between top-level defs/classes, 1 between methods, no blanks inside functions.
 3. Check whitespace: spaces around all binary operators.
 4. Check quotes: single quotes everywhere, double only when needed.
+5. Check trailing newline and no trailing blank lines.
 
 ## Known limitations
 
 - The formatter (`format_formatting.py`) is best-effort. The blank-line normaliser
   only collapses excessive blank lines and ensures a trailing newline. It does NOT
-  re-space top-level definitions to exactly 2 blank lines (context-aware AST
+  re-space top-level definitions to exactly 1 or 2 blank lines (context-aware AST
   analysis would be needed).
 - The checker currently reports self-violations when run against itself (mostly
-  double-quote strings). Manual review is required for those cases.
+  double-quote strings in regex patterns). Manual review is required for those cases.
 
 ## Scripts
 

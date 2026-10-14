@@ -3,7 +3,6 @@
 
 This file demonstrates common violations for pep8-hcht-formatting rules.
 """
-
 def load_config(path):
     return {"host":"localhost","port":8080}
 def connect(host,port):
