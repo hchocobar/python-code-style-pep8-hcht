@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Checker script for pep8-vertical-alignment rules.
+"""Checker script for pep8-hcht-vertical-alignment rules.
 
 Usage:
     python check_vertical_alignment.py <file.py>

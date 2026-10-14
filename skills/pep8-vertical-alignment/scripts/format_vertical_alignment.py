@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Formatter script for pep8-vertical-alignment rules.
+"""Formatter script for pep8-hcht-vertical-alignment rules.
 
 Usage:
     python format_vertical_alignment.py <file.py>

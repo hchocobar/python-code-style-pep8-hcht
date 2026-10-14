@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for pep8-vertical-alignment style rules."""
+"""Tests for pep8-hcht-vertical-alignment style rules."""
 
 import sys
 import tempfile

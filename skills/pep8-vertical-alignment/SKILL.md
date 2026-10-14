@@ -1,5 +1,5 @@
 ---
-name: pep8-vertical-alignment
+name: pep8-hcht-vertical-alignment
 description: "Enforce vertical alignment in multi-line Python constructs (function calls, definitions, lists, dicts, comprehensions, chained calls, binary operators, if/for/with). Use when reviewing or formatting Python code to ensure consistent PEP 8 style with mandatory vertical alignment."
 description-es: "Aplica alineacion vertical obligatoria en construcciones multilinea de Python (llamadas a funciones, definiciones, listas, diccionarios, comprehensions, chained calls, operadores binarios, if/for/with). Usar al revisar o formatear codigo Python para garantizar estilo PEP 8 consistente con alineacion vertical."
 compatibility: Requires Python 3.10+
@@ -8,7 +8,7 @@ metadata:
   collection: python-code-style-pep8-hcht
 ---
 
-# Vertical Alignment — pep8-vertical-alignment
+# Vertical Alignment — pep8-hcht-vertical-alignment
 
 Enforces mandatory vertical alignment for all multi-line Python constructs.
 Hanging indent is prohibited. All content in a multi-line block must align
