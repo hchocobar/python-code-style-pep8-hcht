@@ -159,6 +159,53 @@ def _replace_double_quotes(line: str) -> str:
             result += "'" + content + "'"
         remaining = rest[close_idx + 1:]
     return result
+def fix_docstring_gap(source: str) -> str:
+    """Remove blank line immediately after module docstring close,
+    unless followed by a function/class definition (1 blank allowed).
+    Parameters
+    ----------
+    source : str
+        Source code to transform.
+    Returns
+    -------
+    str
+        Code with docstring gap fixed.
+    """
+    lines = source.splitlines(keepends=True)
+    removals: set[int] = set()
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith('"""') or stripped.startswith("'''"):
+            quote = stripped[:3]
+            rest = stripped[3:]
+            doc_close = i
+            if not rest.endswith(quote):
+                for j in range(i + 1, len(lines)):
+                    ls = lines[j].strip()
+                    if ls.endswith(quote):
+                        doc_close = j
+                        break
+            next_code = -1
+            for k in range(doc_close + 1, len(lines)):
+                if lines[k].strip():
+                    next_code = k
+                    break
+            if next_code < 0:
+                break
+            blanks = next_code - doc_close - 1
+            if blanks > 0:
+                next_text = lines[next_code].strip()
+                is_def = (next_text.startswith('def ')
+                          or next_text.startswith('class ')
+                          or next_text.startswith('@'))
+                if is_def and blanks == 1:
+                    pass  # Keep exactly 1 blank before def/class
+                else:
+                    removals.add(doc_close + 1)
+            break
+    for idx in sorted(removals, reverse=True):
+        del lines[idx]
+    return ''.join(lines)
 
 
 def _item_last_line(node: ast.AST) -> int:
@@ -193,9 +240,18 @@ def fix_internal_blanks(source: str) -> str:
         body = node.body
         if not body:
             continue
+        # Skip docstring in body range
+        doc_end = -1
+        first_stmt = body[0]
+        if (isinstance(first_stmt, ast.Expr)
+                and hasattr(first_stmt, 'value')
+                and isinstance(getattr(first_stmt.value, 'value', None), str)):
+            doc_end = _item_last_line(first_stmt)
         first = body[0].lineno
         last = _item_last_line(body[-1])
         for lineno in range(first, last + 1):
+            if lineno <= doc_end:
+                continue
             idx = lineno - 1
             if idx < len(lines) and lines[idx].strip() == '':
                 removals.add(idx)
@@ -219,6 +275,7 @@ def format_file(filepath: Path) -> bool:
     source = filepath.read_text(encoding='utf-8')
     original = source
     source = fix_blank_lines(source)
+    source = fix_docstring_gap(source)
     source = fix_internal_blanks(source)
     source = fix_operator_whitespace(source)
     source = fix_quote_style(source)

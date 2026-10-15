@@ -65,6 +65,56 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
     return violations
 
 
+def check_docstring_gap(lines: list[str]) -> list[str]:
+    """Check blank line after module docstring close (Rule 1).
+
+    The docstring close must be immediately followed by code. Exactly 1
+    blank line is allowed before a function/class definition, but NOT
+    before imports, comments, or expressions.
+
+    Parameters
+    ----------
+    lines : list[str]
+        Source lines with line endings preserved.
+
+    Returns
+    -------
+    list[str]
+        Violation descriptions.
+    """
+    violations: list[str] = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith('"""') or stripped.startswith("'''"):
+            quote = stripped[:3]
+            rest = stripped[3:]
+            doc_close = i
+            if not rest.endswith(quote):
+                for j in range(i + 1, len(lines)):
+                    ls = lines[j].strip()
+                    if ls.endswith(quote):
+                        doc_close = j
+                        break
+            next_code = -1
+            for k in range(doc_close + 1, len(lines)):
+                if lines[k].strip():
+                    next_code = k
+                    break
+            if next_code < 0:
+                break
+            blanks = next_code - doc_close - 1
+            if blanks > 0:
+                next_text = lines[next_code].strip()
+                is_def = (next_text.startswith('def ')
+                          or next_text.startswith('class ')
+                          or next_text.startswith('@'))
+                if not (is_def and blanks == 1):
+                    violations.append(
+                        f'{doc_close + 2}: Blank line after docstring close')
+            break
+    return violations
+
+
 def check_blank_lines(lines: list[str]) -> list[str]:
     """Check blank line rules (Rule 1).
     Parameters
@@ -97,6 +147,8 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                 violations.append(f'{len(lines)}: Expected 1 trailing blank line, found {trailing_blanks}')
     # Check leading blanks at the start of the file
     violations.extend(check_leading_blanks(lines))
+    # Check blank line after module docstring close
+    violations.extend(check_docstring_gap(lines))
     # Use AST for blank line count between definitions
     source = ''.join(lines)
     try:
@@ -156,9 +208,18 @@ def check_function_internal_blanks(tree: ast.AST,
         body = node.body
         if not body:
             continue
+        # Determine docstring end line if function starts with a docstring
+        doc_end = -1
+        first_stmt = body[0]
+        if (isinstance(first_stmt, ast.Expr)
+                and hasattr(first_stmt, 'value')
+                and isinstance(getattr(first_stmt.value, 'value', None), str)):
+            doc_end = _item_last_line(first_stmt)
         first = body[0].lineno
         last = _item_last_line(body[-1])
         for lineno in range(first, last + 1):
+            if lineno <= doc_end:
+                continue  # Skip lines inside docstring
             idx = lineno - 1
             if idx < len(lines) and lines[idx].strip() == '':
                 violations.append(
