@@ -159,6 +159,8 @@ def _replace_double_quotes(line: str) -> str:
             result += "'" + content + "'"
         remaining = rest[close_idx + 1:]
     return result
+
+
 def fix_docstring_gap(source: str) -> str:
     """Remove blank line immediately after module docstring close,
     unless followed by a function/class definition (1 blank allowed).
