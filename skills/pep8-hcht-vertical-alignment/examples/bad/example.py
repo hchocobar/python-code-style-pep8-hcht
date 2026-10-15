@@ -25,17 +25,17 @@ result = (df.filter(
 
 # Rule 2: Hanging indent in dict items (continuation at 4 spaces)
 config = {
-    "host": "localhost",
-    "port": 8080,
-    "debug": False,
+    'host': 'localhost',
+    'port': 8080,
+    'debug': False,
 }
 
 
 # Rule 2: Hanging indent in list items
 items = [
-    "alpha",
-    "beta",
-    "gamma",
+    'alpha',
+    'beta',
+    'gamma',
 ]
 
 
@@ -54,21 +54,21 @@ formula = (condition_one and
 
 
 # Rule 5: Closing bracket on its own line
-config2 = {host: "localhost",
+config2 = {host: 'localhost',
            port: 8080,
            debug: False,
            }
 
 
 # Rule 6: Split string (implicit concatenation across lines)
-message = ("Lorem ipsum dolor sit amet "
-           "consectetur adipiscing elit")
+message = ('Lorem ipsum dolor sit amet '
+           'consectetur adipiscing elit')
 
 
 # Rule 6: Split string in function call
 violations.append(
-    f"Expected 0 violations, got "
-    f"{len(violations)}")
+    f'Expected 0 violations, got '
+    f'{len(violations)}')
 
 
 # Rule 7: Operator at end of line in if (should be at start)
@@ -89,3 +89,4 @@ active_users = [
 # Rule 4: Backslash line continuation (prohibited)
 value = condition_one \
         and condition_two
+
