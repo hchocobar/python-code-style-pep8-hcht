@@ -10,82 +10,87 @@ import sys
 from pathlib import Path
 
 # --- Allowed short name exceptions ---
+# Single-letter and two-letter names that are accepted by convention
+# in specific contexts (loop indices, coordinates, TypeVar, etc.)
 _ALLOWED_SHORT_NAMES: set[str] = {
-    'i', 'j', 'k',       # Loop indices
-    'n',                  # Loop counter
-    'e',                  # Exception
-    '_',                  # Throwaway / unused
-    'x', 'y', 'z',       # Coordinates
-    'T',                  # TypeVar
-    'df',                 # DataFrame
-    'fn',                 # Function/callback
-    't',                  # Generic target/temporary
-    'v',                  # Generic value/item
-    'arg',                # Function argument
+    'i', 'j', 'k',
+    'n',
+    'e',
+    '_',
+    'x', 'y', 'z',
+    'T',
+    'df',
+    'fn',
+    't',
+    'v',
+    'arg',
 }
 
 # --- Common abbreviations considered non-descriptive ---
+# Names that are abbreviated forms of full English words. These are
+# flagged as non-descriptive because they reduce code readability.
+# Use the full word instead (e.g. 'element' instead of 'elem').
 _COMMON_ABBREVIATIONS: set[str] = {
-    'elem', 'el',     # element
-    'resp',           # response
-    'tmp', 'temp',    # temporary
-    'cfg', 'conf',    # configuration
-    'val',            # value
-    'var',            # variable
-    'arr',            # array
-    'obj',            # object
-    'ret', 'rv',      # return value
-    'msg',            # message
-    'num', 'cnt',     # number, count
-    'idx',            # index
-    'prev', 'curr',   # previous, current
-    'init',           # initialize
-    'calc',           # calculate
-    'req',            # request
-    'res',            # result
-    'arg',            # argument
-    'param', 'prm',   # parameter
-    'attr',           # attribute
-    'dest', 'src',    # destination, source
-    'info',           # information
-    'expr',           # expression
-    'delim',          # delimiter
-    'sep',            # separator
-    'auth',           # authentication
-    'config',         # configuration
-    'stmt',           # statement
-    'exc',            # exception
-    'mod',            # module
-    'doc',            # document / documentation
-    'diff',           # difference
-    'ref',            # reference
-    'impl',           # implementation
-    'len',            # length (built-in, but used as param)
-    'max',            # maximum (built-in, but used as param)
-    'min',            # minimum (built-in, but used as param)
-    'db',             # database
-    'cli',            # command-line interface
-    'api',            # application programming interface
-    'ctx',            # context
-    'cb',             # callback
-    'evt',            # event
-    'hdl',            # handler
-    'mgr',            # manager
-    'svc',            # service
-    'util',           # utility
-    'buf',            # buffer
-    'col',            # column / collection
-    'del',            # delete
-    'err',            # error
-    'ext',            # extension / external
-    'gen',            # generator / general
-    'inc',            # include / increment
-    'neg',            # negative
-    'pos',            # positive
-    'prop',           # property
-    'sel',            # select
-    'str',            # string (built-in, but used as param)
-    'desc',           # description
+    'elem', 'el',
+    'resp',
+    'tmp', 'temp',
+    'cfg', 'conf',
+    'val',
+    'var',
+    'arr',
+    'obj',
+    'ret', 'rv',
+    'msg',
+    'num', 'cnt',
+    'idx',
+    'prev', 'curr',
+    'init',
+    'calc',
+    'req',
+    'res',
+    'arg',
+    'param', 'prm',
+    'attr',
+    'dest', 'src',
+    'info',
+    'expr',
+    'delim',
+    'sep',
+    'auth',
+    'config',
+    'stmt',
+    'exc',
+    'mod',
+    'doc',
+    'diff',
+    'ref',
+    'impl',
+    'len',
+    'max',
+    'min',
+    'db',
+    'cli',
+    'api',
+    'ctx',
+    'cb',
+    'evt',
+    'hdl',
+    'mgr',
+    'svc',
+    'util',
+    'buf',
+    'col',
+    'del',
+    'err',
+    'ext',
+    'gen',
+    'inc',
+    'neg',
+    'pos',
+    'prop',
+    'sel',
+    'str',
+    'desc',
 }
 
 
