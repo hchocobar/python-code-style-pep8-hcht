@@ -11,8 +11,8 @@ from pathlib import Path
 # --- Allowed short name exceptions ---
 # Single-letter and two-letter names that are accepted by convention
 # in specific contexts (loop indices, coordinates, TypeVar, etc.)
-_ALLOWED_SHORT_NAMES: set[str] = {'i', 'j', 'k', 'n', 'e', '_', 'x', 'y', 'z',
-                                   'T', 'df', 'fn', 't', 'arg'}
+_ALLOWED_SHORT_NAMES: set[str] = {'i', 'j', 'k', 'e', '_',
+                                   'T', 'df', 'fn'}
 
 # --- Common abbreviations considered non-descriptive ---
 # Names that are abbreviated forms of full English words. These are
