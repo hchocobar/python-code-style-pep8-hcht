@@ -168,11 +168,11 @@ def check_naming(source: str,
                                                                   'Constant',
                                                                   'UPPER_SNAKE_CASE or snake_case'))
     module_level_lines: set[int] = set()
-    for n in ast.iter_child_nodes(tree):
-        if isinstance(n, ast.Assign):
-            for target in n.targets:
+    for child in ast.iter_child_nodes(tree):
+        if isinstance(child, ast.Assign):
+            for target in child.targets:
                 if isinstance(target, ast.Name):
-                    module_level_lines.add(n.lineno)
+                    module_level_lines.add(child.lineno)
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
@@ -211,21 +211,21 @@ def check_naming(source: str,
                                                                         'Variable'))
         elif isinstance(node, (ast.For, ast.AsyncFor)):
             targets = _flatten_targets(node.target)
-            for t in targets:
-                if isinstance(t, ast.Name):
-                    base_name = _get_base_name(t.id)
-                    if not t.id.startswith('_'):
+            for loop_target in targets:
+                if isinstance(loop_target, ast.Name):
+                    base_name = _get_base_name(loop_target.id)
+                    if not loop_target.id.startswith('_'):
                         if (not _is_snake_case(base_name)
                                 and not base_name.isupper()
                                 and not base_name.islower()):
-                            violations.append(_name_violation_message(t.lineno,
-                                                                      t.id,
+                            violations.append(_name_violation_message(loop_target.lineno,
+                                                                      loop_target.id,
                                                                       'Loop variable',
                                                                       'snake_case'))
-                        if (t.id not in _ALLOWED_SHORT_NAMES
-                                and not _is_descriptive(t.id)):
-                            violations.append(_descriptive_violation_message(t.lineno,
-                                                                            t.id,
+                        if (loop_target.id not in _ALLOWED_SHORT_NAMES
+                                and not _is_descriptive(loop_target.id)):
+                            violations.append(_descriptive_violation_message(loop_target.lineno,
+                                                                            loop_target.id,
                                                                             'Loop variable'))
         elif isinstance(node, ast.ExceptHandler):
             if node.name is not None and isinstance(node.name, str):
