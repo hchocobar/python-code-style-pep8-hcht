@@ -13,7 +13,7 @@ from pathlib import Path
 # Single-letter and two-letter names that are accepted by convention
 # in specific contexts (loop indices, coordinates, TypeVar, etc.)
 _ALLOWED_SHORT_NAMES: set[str] = {'i', 'j', 'k', 'n', 'e', '_', 'x', 'y', 'z',
-                                   'T', 'df', 'fn', 't', 'v', 'arg'}
+                                   'T', 'df', 'fn', 't', 'arg'}
 
 # --- Common abbreviations considered non-descriptive ---
 # Names that are abbreviated forms of full English words. These are
@@ -305,8 +305,8 @@ def _flatten_targets(target: ast.AST) -> list[ast.AST]:
     """Flatten tuple/list targets into a list of names."""
     if isinstance(target, (ast.Tuple, ast.List)):
         result: list[ast.AST] = []
-        for el in target.elts:
-            result.extend(_flatten_targets(el))
+        for element in target.elts:
+            result.extend(_flatten_targets(element))
         return result
     return [target]
 
@@ -326,8 +326,8 @@ def main() -> None:
         print('No violations found.')
     else:
         print(f'Found {len(violations)} violation(s):')
-        for v in violations:
-            print(f'  - {v}')
+        for violation in violations:
+            print(f'  - {violation}')
         sys.exit(1)
 
 
