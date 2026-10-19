@@ -84,15 +84,14 @@ def _name_violation_message(lineno: int,
                             kind: str,
                             expected: str) -> str:
     """Format a naming violation message."""
-    return (f'{lineno}: {kind} \'{name}\' must use {expected}')
+    return f'{lineno}: {kind} \'{name}\' must use {expected}'
 
 
 def _descriptive_violation_message(lineno: int,
                                    name: str,
                                    kind: str) -> str:
     """Format a non-descriptive name violation message."""
-    return (f'{lineno}: {kind} \'{name}\' is not descriptive '
-            '(use a full word or phrase in English)')
+    return f'{lineno}: {kind} \'{name}\' is not descriptive (use a full word or phrase in English)'
 
 
 def check_naming(source: str,
