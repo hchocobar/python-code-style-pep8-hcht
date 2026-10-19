@@ -13,7 +13,7 @@ from pathlib import Path
 # Single-letter and two-letter names that are accepted by convention
 # in specific contexts (loop indices, coordinates, TypeVar, etc.)
 _ALLOWED_SHORT_NAMES: set[str] = {
-    'i', 'j', 'k',
+                                  'i', 'j', 'k',
     'n',
     'e',
     '_',
@@ -23,15 +23,14 @@ _ALLOWED_SHORT_NAMES: set[str] = {
     'fn',
     't',
     'v',
-    'arg',
-}
+    'arg'}
 
 # --- Common abbreviations considered non-descriptive ---
 # Names that are abbreviated forms of full English words. These are
 # flagged as non-descriptive because they reduce code readability.
 # Use the full word instead (e.g. 'element' instead of 'elem').
 _COMMON_ABBREVIATIONS: set[str] = {
-    'elem', 'el',
+                                   'elem', 'el',
     'resp',
     'tmp', 'temp',
     'cfg', 'conf',
@@ -90,8 +89,7 @@ _COMMON_ABBREVIATIONS: set[str] = {
     'prop',
     'sel',
     'str',
-    'desc',
-}
+    'desc'}
 
 
 _SNAKE_CASE_RE  = re.compile(r'^_*[a-z][a-z0-9]*(_[a-z0-9]+)*_*$')
@@ -100,27 +98,27 @@ _PASCAL_CASE_RE = re.compile(r'^_?[A-Z][a-zA-Z0-9]*$')
 
 
 def _is_snake_case(name: str) -> bool:
-    """Check if name follows snake_case convention."""
+                   """Check if name follows snake_case convention."""
     return bool(_SNAKE_CASE_RE.match(name))
 
 
 def _is_upper_snake_case(name: str) -> bool:
-    """Check if name follows UPPER_SNAKE_CASE convention."""
+                         """Check if name follows UPPER_SNAKE_CASE convention."""
     return bool(_UPPER_SNAKE_RE.match(name))
 
 
 def _is_pascal_case(name: str) -> bool:
-    """Check if name follows PascalCase convention."""
+                    """Check if name follows PascalCase convention."""
     return bool(_PASCAL_CASE_RE.match(name))
 
 
 def _get_base_name(name: str) -> str:
-    """Strip leading underscores from a name for case checking."""
+                   """Strip leading underscores from a name for case checking."""
     return name.lstrip('_')
 
 
 def _is_descriptive(name: str) -> bool:
-    """Check if a name is sufficiently descriptive.
+                    """Check if a name is sufficiently descriptive.
 
     Parameters
     ----------
@@ -133,8 +131,8 @@ def _is_descriptive(name: str) -> bool:
         True if the name is descriptive, False if it appears abbreviated.
     """
     base = _get_base_name(name)
-    base = base.rstrip('_')
-    if not base:
+                          base = base.rstrip('_')
+                                             if not base:
         return True
     if len(base) <= 2:
         stripped = name.strip('_')
@@ -156,13 +154,12 @@ def _descriptive_violation_message(lineno: int,
                                    name: str,
                                    kind: str) -> str:
     """Format a non-descriptive name violation message."""
-    return (f'{lineno}: {kind} \'{name}\' is not descriptive '
-            '(use a full word or phrase in English)')
+    return (f'{lineno}: {kind} \'{name}\' is not descriptive (use a full word or phrase in English)'
 
 
 def check_naming(source: str,
                  filepath: Path) -> list[str]:
-    """Check naming conventions in Python source code.
+                                         """Check naming conventions in Python source code.
 
     Parameters
     ----------
@@ -177,9 +174,9 @@ def check_naming(source: str,
         List of violation descriptions.
     """
     violations: list[str] = []
-    try:
+                             try:
         tree = ast.parse(source)
-    except SyntaxError as e:
+                         except SyntaxError as e:
         violations.append(f'Syntax error: {e}')
         return violations
     # --- 1. Class names: PascalCase ---
@@ -241,12 +238,12 @@ def check_naming(source: str,
                                 'UPPER_SNAKE_CASE or snake_case'))
     # --- 4. Variable names in assignments ---
     module_level_lines: set[int] = set()
-    for n in ast.iter_child_nodes(tree):
+                                       for n in ast.iter_child_nodes(tree):
         if isinstance(n, ast.Assign):
             for target in n.targets:
                 if isinstance(target, ast.Name):
                     module_level_lines.add(n.lineno)
-    for node in ast.walk(tree):
+                                           for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -364,7 +361,7 @@ def check_naming(source: str,
 
 
 def _flatten_targets(target: ast.AST) -> list[ast.AST]:
-    """Flatten tuple/list targets into a list of names."""
+                                              """Flatten tuple/list targets into a list of names."""
     if isinstance(target, (ast.Tuple, ast.List)):
         result: list[ast.AST] = []
         for el in target.elts:
@@ -374,19 +371,19 @@ def _flatten_targets(target: ast.AST) -> list[ast.AST]:
 
 
 def main() -> None:
-    """Entry point. Reads file path from CLI args and prints violations."""
+         """Entry point. Reads file path from CLI args and prints violations."""
     if len(sys.argv) < 2:
         print('Usage: python check_naming.py <file.py>')
         sys.exit(1)
-    filepath = Path(sys.argv[1])
-    if not filepath.exists():
+                 filepath = Path(sys.argv[1])
+                                          if not filepath.exists():
         print(f'File not found: {filepath}')
         sys.exit(1)
-    source = filepath.read_text(encoding='utf-8')
-    violations = check_naming(source, filepath)
-    if not violations:
+                 source = filepath.read_text(encoding='utf-8')
+                                             violations = check_naming(source, filepath)
+                                                                       if not violations:
         print('No violations found.')
-    else:
+              else:
         print(f'Found {len(violations)} violation(s):')
         for v in violations:
             print(f'  - {v}')
