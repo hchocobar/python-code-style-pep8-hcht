@@ -247,20 +247,20 @@ def check_naming(source: str,
             for item in node.items:
                 if item.optional_vars is not None:
                     targets = _flatten_targets(item.optional_vars)
-                    for t in targets:
-                        if isinstance(t, ast.Name):
-                            if (t.id != '_'
-                                    and not t.id.startswith('__')):
-                                base_name = _get_base_name(t.id)
+                    for ctx_target in targets:
+                        if isinstance(ctx_target, ast.Name):
+                            if (ctx_target.id != '_'
+                                    and not ctx_target.id.startswith('__')):
+                                base_name = _get_base_name(ctx_target.id)
                                 if (not _is_snake_case(base_name)
                                         and not base_name.islower()):
-                                    violations.append(_name_violation_message(t.lineno,
-                                                                              t.id,
+                                    violations.append(_name_violation_message(ctx_target.lineno,
+                                                                              ctx_target.id,
                                                                               'Context variable',
                                                                               'snake_case'))
-                                if not _is_descriptive(t.id):
-                                    violations.append(_descriptive_violation_message(t.lineno,
-                                                                                    t.id,
+                                if not _is_descriptive(ctx_target.id):
+                                    violations.append(_descriptive_violation_message(ctx_target.lineno,
+                                                                                    ctx_target.id,
                                                                                     'Context variable'))
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
