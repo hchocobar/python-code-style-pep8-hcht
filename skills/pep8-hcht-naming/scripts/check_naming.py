@@ -118,23 +118,32 @@ def check_naming(source: str,
         if isinstance(node, ast.ClassDef):
             base_name = _get_base_name(node.name)
             if not _is_pascal_case(base_name):
-                violations.append(_name_violation_message(
-                    node.lineno, node.name, 'Class', 'PascalCase'))
+                violations.append(
+                    _name_violation_message(node.lineno,
+                                            node.name,
+                                            'Class',
+                                            'PascalCase'))
             elif not _is_descriptive(node.name):
-                violations.append(_descriptive_violation_message(
-                    node.lineno, node.name, 'Class'))
+                violations.append(
+                    _descriptive_violation_message(node.lineno,
+                                                   node.name,
+                                                   'Class'))
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             if node.name.startswith('__') and node.name.endswith('__'):
                 continue
             base_name = _get_base_name(node.name)
             if not _is_snake_case(base_name):
-                violations.append(_name_violation_message(
-                    node.lineno, node.name,
-                    'Function/Method', 'snake_case'))
+                violations.append(
+                    _name_violation_message(node.lineno,
+                                            node.name,
+                                            'Function/Method',
+                                            'snake_case'))
             elif not _is_descriptive(node.name):
-                violations.append(_descriptive_violation_message(
-                    node.lineno, node.name, 'Function/Method'))
+                violations.append(
+                    _descriptive_violation_message(node.lineno,
+                                                   node.name,
+                                                   'Function/Method'))
     for node in ast.iter_child_nodes(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
@@ -142,25 +151,29 @@ def check_naming(source: str,
                     base_name = _get_base_name(target.id)
                     if (base_name.isupper()
                             and not _is_upper_snake_case(base_name)):
-                        violations.append(_name_violation_message(
-                            node.lineno, target.id,
-                            'Constant', 'UPPER_SNAKE_CASE'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    target.id,
+                                                    'Constant',
+                                                    'UPPER_SNAKE_CASE'))
                     elif (len(base_name) > 1
                           and base_name.isupper()
                           and '_' not in base_name):
-                        violations.append(_name_violation_message(
-                            node.lineno, target.id,
-                            'Constant',
-                            'UPPER_SNAKE_CASE (add underscores)'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    target.id,
+                                                    'Constant',
+                                                    'UPPER_SNAKE_CASE (add underscores)'))
                     elif (len(base_name) > 1
                           and not base_name.islower()
                           and not base_name[0].islower()
                           and not _is_upper_snake_case(base_name)
                           and not _is_pascal_case(base_name)):
-                        violations.append(_name_violation_message(
-                            node.lineno, target.id,
-                            'Constant',
-                            'UPPER_SNAKE_CASE or snake_case'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    target.id,
+                                                    'Constant',
+                                                    'UPPER_SNAKE_CASE or snake_case'))
     module_level_lines: set[int] = set()
     for n in ast.iter_child_nodes(tree):
         if isinstance(n, ast.Assign):
@@ -181,25 +194,32 @@ def check_naming(source: str,
                         continue
                     if (not _is_snake_case(base_name)
                             and not base_name.islower()):
-                        violations.append(_name_violation_message(
-                            node.lineno, target.id,
-                            'Variable', 'snake_case'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    target.id,
+                                                    'Variable',
+                                                    'snake_case'))
                     if not _is_descriptive(target.id):
-                        violations.append(_descriptive_violation_message(
-                            node.lineno, target.id, 'Variable'))
+                        violations.append(
+                            _descriptive_violation_message(node.lineno,
+                                                           target.id,
+                                                           'Variable'))
         elif isinstance(node, ast.AugAssign):
             if isinstance(node.target, ast.Name):
                 base_name = _get_base_name(node.target.id)
                 if not base_name.isupper() and node.target.id != '_':
                     if (not _is_snake_case(base_name)
                             and not base_name.islower()):
-                        violations.append(_name_violation_message(
-                            node.lineno, node.target.id,
-                            'Variable', 'snake_case'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    node.target.id,
+                                                    'Variable',
+                                                    'snake_case'))
                     if not _is_descriptive(node.target.id):
-                        violations.append(_descriptive_violation_message(
-                            node.lineno, node.target.id,
-                            'Variable'))
+                        violations.append(
+                            _descriptive_violation_message(node.lineno,
+                                                           node.target.id,
+                                                           'Variable'))
         elif isinstance(node, (ast.For, ast.AsyncFor)):
             targets = _flatten_targets(node.target)
             for t in targets:
@@ -209,13 +229,17 @@ def check_naming(source: str,
                         if (not _is_snake_case(base_name)
                                 and not base_name.isupper()
                                 and not base_name.islower()):
-                            violations.append(_name_violation_message(
-                                t.lineno, t.id,
-                                'Loop variable', 'snake_case'))
+                            violations.append(
+                                _name_violation_message(t.lineno,
+                                                        t.id,
+                                                        'Loop variable',
+                                                        'snake_case'))
                         if (t.id not in _ALLOWED_SHORT_NAMES
                                 and not _is_descriptive(t.id)):
-                            violations.append(_descriptive_violation_message(
-                                t.lineno, t.id, 'Loop variable'))
+                            violations.append(
+                                _descriptive_violation_message(t.lineno,
+                                                               t.id,
+                                                               'Loop variable'))
         elif isinstance(node, ast.ExceptHandler):
             if node.name is not None and isinstance(node.name, str):
                 if (node.name != 'e'
@@ -224,13 +248,16 @@ def check_naming(source: str,
                     base_name = _get_base_name(node.name)
                     if (not _is_snake_case(base_name)
                             and not base_name.islower()):
-                        violations.append(_name_violation_message(
-                            node.lineno, node.name,
-                            'Exception variable', 'snake_case'))
+                        violations.append(
+                            _name_violation_message(node.lineno,
+                                                    node.name,
+                                                    'Exception variable',
+                                                    'snake_case'))
                     if not _is_descriptive(node.name):
-                        violations.append(_descriptive_violation_message(
-                            node.lineno, node.name,
-                            'Exception variable'))
+                        violations.append(
+                            _descriptive_violation_message(node.lineno,
+                                                           node.name,
+                                                           'Exception variable'))
         elif isinstance(node, ast.With):
             for item in node.items:
                 if item.optional_vars is not None:
@@ -242,15 +269,16 @@ def check_naming(source: str,
                                 base_name = _get_base_name(t.id)
                                 if (not _is_snake_case(base_name)
                                         and not base_name.islower()):
-                                    violations.append(_name_violation_message(
-                                        t.lineno, t.id,
-                                        'Context variable',
-                                        'snake_case'))
+                                    violations.append(
+                                        _name_violation_message(t.lineno,
+                                                                t.id,
+                                                                'Context variable',
+                                                                'snake_case'))
                                 if not _is_descriptive(t.id):
                                     violations.append(
-                                        _descriptive_violation_message(
-                                            t.lineno, t.id,
-                                            'Context variable'))
+                                        _descriptive_violation_message(t.lineno,
+                                                                       t.id,
+                                                                       'Context variable'))
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             standard_args = {'self', 'cls', 'args', 'kwargs'}
@@ -264,12 +292,16 @@ def check_naming(source: str,
                     arg, 'lineno') else node.lineno
                 if (not _is_snake_case(base_name)
                         and not base_name.islower()):
-                    violations.append(_name_violation_message(
-                        par_lineno, arg.arg,
-                        'Parameter', 'snake_case'))
+                    violations.append(
+                        _name_violation_message(par_lineno,
+                                                arg.arg,
+                                                'Parameter',
+                                                'snake_case'))
                 if not _is_descriptive(arg.arg):
-                    violations.append(_descriptive_violation_message(
-                        par_lineno, arg.arg, 'Parameter'))
+                    violations.append(
+                        _descriptive_violation_message(par_lineno,
+                                                       arg.arg,
+                                                       'Parameter'))
     return violations
 
 
