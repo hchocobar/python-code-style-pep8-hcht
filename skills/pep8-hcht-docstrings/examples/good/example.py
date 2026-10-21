@@ -1,7 +1,9 @@
 """Example module with correct NumPy-style docstrings for all functions."""
 
+
 def add(first: int, second: int) -> int:
-    """Add two integers and return the result.
+    """
+    Add two integers and return the result.
 
     Parameters
     ----------
@@ -19,7 +21,8 @@ def add(first: int, second: int) -> int:
 
 
 def greet(name: str) -> str:
-    """Generate a greeting message for the given name.
+    """
+    Generate a greeting message for the given name.
 
     Parameters
     ----------
@@ -38,7 +41,8 @@ class Calculator:
     """A simple calculator class."""
 
     def __init__(self, factor: float = 1.0) -> None:
-        """Initialize the calculator with a multiplier factor.
+        """
+        Initialize the calculator with a multiplier factor.
 
         Parameters
         ----------
@@ -48,7 +52,8 @@ class Calculator:
         self.factor = factor
 
     def multiply(self, value: float) -> float:
-        """Multiply a value by the internal factor.
+        """
+        Multiply a value by the internal factor.
 
         Parameters
         ----------
@@ -61,4 +66,3 @@ class Calculator:
             The multiplied result.
         """
         return value * self.factor
-

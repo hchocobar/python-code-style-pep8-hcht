@@ -11,11 +11,13 @@ from check_docstrings import (
     _get_docstring_or_none,
     _is_numpy_docstring,
     _check_no_blank_after_docstring,
+    _check_multiline_docstring_format,
     check_docstrings,
 )
 from format_docstrings import (
     _insert_missing_docstring,
     _remove_blank_lines_after_docstrings,
+    _fix_multiline_docstring_format,
     format_docstrings,
 )
 
@@ -176,6 +178,66 @@ class TestTrailingBlankLine:
 
 
 # ---------------------------------------------------------------------------
+# Tests for _check_multiline_docstring_format
+# ---------------------------------------------------------------------------
+
+class TestMultilineDocstringFormat:
+    """Tests for multi-line docstring opening/closing format."""
+
+    def test_proper_multiline(self) -> None:
+        """Verify a properly formatted multi-line docstring passes."""
+        source = ('def foo():\n'
+                  + '    """\n'
+                  + '    Do something.\n'
+                  + '    """\n'
+                  + '    pass')
+        violations = _check_multiline_docstring_format(source, 1)
+        assert violations == [], (
+            'Expected no violations, got: ' + str(violations))
+
+    def test_opening_with_text(self) -> None:
+        """Verify text after opening triple quote is flagged."""
+        source = ('def foo():\n'
+                  + '    """Do something.\n'
+                  + '    More details.\n'
+                  + '    """\n'
+                  + '    pass')
+        violations = _check_multiline_docstring_format(source, 1)
+        assert len(violations) >= 1
+        assert 'opening triple quote' in violations[0].lower()
+
+    def test_closing_with_text(self) -> None:
+        """Verify text before closing triple quote is flagged."""
+        source = ('def foo():\n'
+                  + '    """\n'
+                  + '    Do something.\n'
+                  + '    More details."""\n'
+                  + '    pass')
+        violations = _check_multiline_docstring_format(source, 1)
+        assert len(violations) >= 1
+        assert 'closing triple quote' in violations[0].lower()
+
+    def test_single_line_docstring_ok(self) -> None:
+        """Verify single-line docstrings are not flagged."""
+        source = ('def foo():\n'
+                  + '    """Short description."""\n'
+                  + '    pass')
+        violations = _check_multiline_docstring_format(source, 1)
+        assert violations == []
+
+    def test_both_opening_and_closing_issues(self) -> None:
+        """Verify both opening and closing issues are flagged."""
+        source = ('def foo():\n'
+                  + '    """Do something.\n'
+                  + '    More details."""\n'
+                  + '    pass')
+        violations = _check_multiline_docstring_format(source, 1)
+        assert len(violations) >= 2, (
+            'Expected 2+ violations (opening + closing), got: '
+            + str(violations))
+
+
+# ---------------------------------------------------------------------------
 # Checker integration tests
 # ---------------------------------------------------------------------------
 
@@ -248,6 +310,18 @@ class TestCheckDocstrings:
         assert len(violations) == 1
         assert 'Syntax error' in violations[0]
 
+    def test_multiline_format_violation_detected(self) -> None:
+        """Verify opening/closing format is checked in integration."""
+        source = ('def foo():\n'
+                  + '    """Do something.\n'
+                  + '    More details."""\n'
+                  + '    pass')
+        violations = check_docstrings(source, Path('/tmp/test.py'))
+        assert any('opening triple quote' in v.lower()
+                    or 'closing triple quote' in v.lower()
+                    for v in violations), (
+            'Expected multiline format violation, got: ' + str(violations))
+
 
 # ---------------------------------------------------------------------------
 # Formatter tests
@@ -269,14 +343,16 @@ class TestFormatDocstrings:
         assert result == expected
 
     def test_insert_missing_docstring(self) -> None:
-        """Verify a placeholder docstring is inserted."""
+        """Verify a placeholder is inserted."""
         source = 'def foo():\n    return 1\n'
         result = format_docstrings(source)
         tree = ast.parse(result)
         func = tree.body[0]
         assert isinstance(func, ast.FunctionDef)
         doc_string = ast.get_docstring(func)
-        assert doc_string is not None, 'Expected docstring, got:\n' + result
+        assert doc_string is not None, (
+            'Expected docstring, got:\n' + result
+        )
         assert 'TODO' in doc_string, (
             'Expected TODO placeholder, got: ' + str(doc_string)
         )
@@ -310,6 +386,58 @@ class TestFormatDocstrings:
         assert result == source, (
             'Good example should be unchanged by formatter'
         )
+
+
+# ---------------------------------------------------------------------------
+# Formatter tests for multi-line docstring format
+# ---------------------------------------------------------------------------
+
+class TestFormatMultilineDocstrings:
+    """Tests for the multi-line docstring formatter."""
+
+    def test_fix_opening_with_text(self) -> None:
+        """Verify text after opening triple quote is moved."""
+        source = ('def foo():\n'
+                  + '    """Do something.\n'
+                  + '    More details.\n'
+                  + '    """\n'
+                  + '    pass')
+        result = _fix_multiline_docstring_format(source)
+        lines = result.split('\n')
+        assert lines[1].strip() == '"""', (
+            'Expected opening """ on its own line, got: ' + lines[1]
+        )
+
+    def test_fix_closing_with_text(self) -> None:
+        """Verify text before closing triple quote is separated."""
+        source = ('def foo():\n'
+                  + '    """\n'
+                  + '    Do something.\n'
+                  + '    More details."""\n'
+                  + '    pass')
+        result = _fix_multiline_docstring_format(source)
+        lines = result.split('\n')
+        assert lines[3].strip() == '"""', (
+            'Expected closing """ on its own line, got: ' + lines[3]
+        )
+
+    def test_single_line_unchanged(self) -> None:
+        """Verify single-line docstrings are unchanged."""
+        source = ('def foo():\n'
+                  + '    """Short description."""\n'
+                  + '    pass')
+        result = _fix_multiline_docstring_format(source)
+        assert result == source
+
+    def test_already_correct_unchanged(self) -> None:
+        """Verify already correct multi-line docstrings are unchanged."""
+        source = ('def foo():\n'
+                  + '    """\n'
+                  + '    Do something.\n'
+                  + '    """\n'
+                  + '    pass')
+        result = _fix_multiline_docstring_format(source)
+        assert result == source
 
 
 # ---------------------------------------------------------------------------

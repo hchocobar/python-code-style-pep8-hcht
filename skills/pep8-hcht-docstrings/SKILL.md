@@ -1,10 +1,10 @@
 ---
 name: pep8-hcht-docstrings
-description: "Enforce NumPy-style docstrings for all functions and methods. Checks that every function/method has a docstring, that it follows NumPy conventions (Parameters/Returns sections), and that no blank line separates the docstring from the following code."
-description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, que siga las convenciones NumPy (secciones Parameters/Returns) y que no haya linea en blanco entre el docstring y el codigo siguiente."
+description: "Enforce NumPy-style docstrings for all functions and methods. Checks that every function/method has a docstring, that it follows NumPy conventions (Parameters/Returns sections), that no blank line separates the docstring from the following code, and that multi-line docstrings have the opening and closing triple quotes on their own lines."
+description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, que siga las convenciones NumPy (secciones Parameters/Returns), que no haya linea en blanco entre el docstring y el codigo siguiente, y que los docstrings multi-linea tengan las comillas triples de apertura y cierre en sus propias lineas."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.0"
+  version: "1.1"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -30,6 +30,38 @@ The docstring closing `"""` must be immediately followed by the next statement. 
 
 Docstring lines must not contain trailing whitespace.
 
+### 5. Multi-line docstring format
+
+Multi-line docstrings (spanning more than one line) must have the opening triple quote `"""` on its own line with no text following it, and the closing triple quote on its own line with no text preceding it.
+
+**Correct:**
+
+```python
+def add(a: int, b: int) -> int:
+    """
+    Add two integers.
+    """
+    return a + b
+```
+
+**Incorrect:**
+
+```python
+def add(a: int, b: int) -> int:
+    """Add two integers.
+    """
+    return a + b
+```
+
+```python
+def add(a: int, b: int) -> int:
+    """
+    Add two integers."""
+    return a + b
+```
+
+Single-line docstrings (e.g., `"""Short description."""`) are exempt from this rule.
+
 ## Review flow
 
 1. Run `check_docstrings.py` on the target file.
@@ -39,7 +71,7 @@ Docstring lines must not contain trailing whitespace.
 ## Scripts
 
 - `scripts/check_docstrings.py` — Analyzes a .py file and reports docstring violations.
-- `scripts/format_docstrings.py` — Automatically inserts missing docstrings with a placeholder and removes blank lines after docstrings.
+- `scripts/format_docstrings.py` — Automatically inserts missing docstrings with a placeholder, removes blank lines after docstrings, and fixes multi-line docstring formatting.
 
 ## Validation
 

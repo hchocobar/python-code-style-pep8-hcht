@@ -1,5 +1,6 @@
 """Example module with docstring violations."""
 
+
 def missing_docstring(first: int, second: int) -> int:
     """This function uses Google style instead of NumPy.
 
@@ -48,5 +49,13 @@ class DataProcessor:
         return [x for x in data if x > 0.5]
 
     def transform(self, values: list[float]) -> list[float]:
+        """Bad multiline: text on opening line and text before closing.
+        This docstring has multiple format violations.
+        """
         return [element * 2 for element in values]
 
+    def multiline_wrong_closing(self) -> None:
+        """
+        This docstring has the closing triple quote on the same line
+        as the last text."""
+        pass
