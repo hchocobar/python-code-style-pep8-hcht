@@ -145,6 +145,10 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                 violations.append(f'{len(lines)}: Expected 1 trailing blank line, found 0')
             elif trailing_blanks > 1:
                 violations.append(f'{len(lines)}: Expected 1 trailing blank line, found {trailing_blanks}')
+            elif lines[-1].rstrip('\r\n') != '':
+                violations.append(
+                    f'{len(lines)}: Trailing blank line must be empty '
+                    f'(no spaces or tabs)')
     # Check leading blanks at the start of the file
     violations.extend(check_leading_blanks(lines))
     # Check blank line after module docstring close

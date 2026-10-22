@@ -55,8 +55,15 @@ class SampleClass:
 ```
 
 Always leave a trailing blank line after the last code in every `.py` file.
-The file must end with a single blank line (empty line) following the final
-newline.
+The file must end with exactly one blank line following the final newline.
+That blank line must be truly empty: spaces or tabs are not allowed.
+
+```python
+# Correct — file ends with exactly 1 empty line
+greeting = 'Hello World'
+print(greeting)
+
+```
 
 ### 2. Whitespace around binary operators
 
@@ -131,12 +138,13 @@ def func() -> None:
 2. Check blank lines: 1 blank line after docstring, 2 between top-level defs/classes, 1 between methods, no blanks inside functions.
 3. Check whitespace: spaces around all binary operators.
 4. Check quotes: single quotes everywhere, double only when needed.
-5. Check trailing newline and no trailing blank lines.
+5. Check trailing newline: exactly 1 trailing blank line at the end of the file, truly empty (no spaces or tabs).
 
 ## Known limitations
 
 - The formatter (`format_formatting.py`) is best-effort. The blank-line normaliser
-  only collapses excessive blank lines and ensures a trailing newline. It does NOT
+  only collapses excessive blank lines and ensures exactly one trailing blank line
+  (an empty line after the final newline), removing trailing whitespace. It does NOT
   re-space top-level definitions to exactly 1 or 2 blank lines (context-aware AST
   analysis would be needed).
 - The checker currently reports self-violations when run against itself (mostly

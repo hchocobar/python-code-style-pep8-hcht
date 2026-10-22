@@ -131,6 +131,83 @@ class TestChecker:
         assert len(leading) == 0, (
             f'Expected 0 leading blank violations, got: {leading}')
 
+    def test_detect_no_trailing_blank(self) -> None:
+        """Rule 1: detect missing trailing blank line (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n')
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        found = any('trailing blank line' in v.lower()
+                    for v in violations)
+        assert found, (
+            f'Expected trailing blank violation, got: {violations}')
+
+    def test_detect_multiple_trailing_blanks(self) -> None:
+        """Rule 1: detect more than one trailing blank line (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n\n\n')
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        found = any('found 2' in v.lower()
+                    for v in violations)
+        assert found, (
+            f'Expected multiple trailing blank violation, got: {violations}')
+
+    def test_detect_trailing_blank_with_spaces(self) -> None:
+        """Rule 1: trailing blank line with spaces is invalid (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '    \n')
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        found = any('must be empty' in v.lower()
+                    for v in violations)
+        assert found, (
+            f'Expected empty-blank violation, got: {violations}')
+
+    def test_detect_trailing_blank_with_tab(self) -> None:
+        """Rule 1: trailing blank line with tab is invalid (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '\t\n')
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        found = any('must be empty' in v.lower()
+                    for v in violations)
+        assert found, (
+            f'Expected empty-blank violation, got: {violations}')
+
+    def test_accept_single_trailing_blank(self) -> None:
+        """Rule 1: exactly 1 empty trailing blank line is valid (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    "print(greeting)\n\n")
+            f.flush()
+            path = Path(f.name)
+        violations = check_file(path)
+        path.unlink()
+        trailing = [v for v in violations
+                    if 'trailing blank' in v.lower()]
+        assert len(trailing) == 0, (
+            f'Expected 0 trailing blank violations, got: {trailing}')
+
 
 class TestFormatter:
     """Tests for the formatter script."""
@@ -180,6 +257,68 @@ class TestFormatter:
         assert "'localhost'" in content, (
             'Expected single quotes after formatting')
 
+    def test_format_adds_missing_trailing_blank(self) -> None:
+        """Rule 1: formatter adds the missing trailing blank line (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n')
+            f.flush()
+            path = Path(f.name)
+        changed = format_file(path)
+        content = path.read_text(encoding='utf-8')
+        path.unlink()
+        assert changed, 'Expected file to be changed'
+        assert content.endswith('\n\n'), (
+            f'Expected 1 trailing blank line, got: {content!r}')
+
+    def test_format_removes_excess_trailing_blanks(self) -> None:
+        """Rule 1: formatter collapses excess trailing blanks (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n\n\n')
+            f.flush()
+            path = Path(f.name)
+        changed = format_file(path)
+        content = path.read_text(encoding='utf-8')
+        path.unlink()
+        assert changed, 'Expected file to be changed'
+        assert content.endswith('\n\n'), (
+            f'Expected 1 trailing blank line, got: {content!r}')
+
+    def test_format_cleans_trailing_blank_with_whitespace(self) -> None:
+        """Rule 1: formatter empties trailing blank with spaces (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '    \n')
+            f.flush()
+            path = Path(f.name)
+        changed = format_file(path)
+        content = path.read_text(encoding='utf-8')
+        path.unlink()
+        assert changed, 'Expected file to be changed'
+        assert content.endswith('\n\n'), (
+            f'Expected 1 trailing blank line, got: {content!r}')
+
+    def test_format_cleans_trailing_blank_with_tab(self) -> None:
+        """Rule 1: formatter empties trailing blank with tab (issue #16)."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '\t\n')
+            f.flush()
+            path = Path(f.name)
+        changed = format_file(path)
+        content = path.read_text(encoding='utf-8')
+        path.unlink()
+        assert changed, 'Expected file to be changed'
+        assert content.endswith('\n\n'), (
+            f'Expected 1 trailing blank line, got: {content!r}')
+
 
 class TestIntegration:
     """Integration tests: format then check."""
@@ -216,3 +355,40 @@ class TestIntegration:
         path.unlink()
         assert first_content == second_content, (
             'Second format should not change content')
+
+    def test_format_then_check_trailing_clean(self) -> None:
+        """Issue #16: after formatting, trailing blank checks must pass."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '    \n')
+            f.flush()
+            path = Path(f.name)
+        format_file(path)
+        violations = check_file(path)
+        path.unlink()
+        trailing = [v for v in violations
+                    if 'trailing blank' in v.lower()
+                    or 'trailing newline' in v.lower()]
+        assert len(trailing) == 0, (
+            f'Expected 0 trailing blank violations, got: {trailing}')
+
+    def test_format_idempotent_trailing(self) -> None:
+        """Issue #16: formatting twice is idempotent for trailing blank."""
+        with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.py', delete=False) as f:
+            f.write("greeting = 'Hello World'\n"
+                    'print(greeting)\n'
+                    '\t\n')
+            f.flush()
+            path = Path(f.name)
+        format_file(path)
+        first_content = path.read_text(encoding='utf-8')
+        changed = format_file(path)
+        second_content = path.read_text(encoding='utf-8')
+        path.unlink()
+        assert not changed, 'Second format should not change content'
+        assert first_content == second_content, (
+            'Second format should not change content')
+

@@ -21,8 +21,10 @@ def fix_blank_lines(source: str) -> str:
     str
         Code with blank lines normalised.
     """
-    # Ensure single trailing newline followed by a blank line
-    source = source.rstrip('\n') + '\n\n'
+    # Remove trailing whitespace from every line
+    source = re.sub(r'[ \t]+(?=\n)', '', source)
+    # Ensure exactly one trailing blank line: <code>\n\n
+    source = source.rstrip() + '\n\n'
     # Collapse 3+ consecutive blank lines to 2
     source = re.sub(r'\n{4,}', '\n\n\n', source)
     # Remove leading blank lines
@@ -281,6 +283,8 @@ def format_file(filepath: Path) -> bool:
     source = fix_internal_blanks(source)
     source = fix_operator_whitespace(source)
     source = fix_quote_style(source)
+    # Re-ensure the ending after phases that delete lines
+    source = fix_blank_lines(source)
     if source == original:
         return False
     filepath.write_text(source, encoding='utf-8')
