@@ -4,7 +4,7 @@ description: "Enforce NumPy-style docstrings for all functions and methods. Chec
 description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, que siga las convenciones NumPy (secciones Parameters/Returns), que no haya linea en blanco entre el docstring y el codigo siguiente, y que los docstrings multi-linea tengan las comillas triples de apertura y cierre en sus propias lineas."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.1"
+  version: "1.2"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -26,11 +26,15 @@ Docstrings must use the NumPy/SciPy convention. Google-style (`Args:`, `Returns:
 
 The docstring closing `"""` must be immediately followed by the next statement. No blank line is allowed between the end of the docstring and the first line of code.
 
-### 4. No trailing whitespace in docstring lines
+### 4. Triple double quotes only
+
+Docstrings must use triple double quotes (`"""`). Triple single quotes (`'''`) are rejected. This applies to both single-line and multi-line docstrings.
+
+### 5. No trailing whitespace in docstring lines
 
 Docstring lines must not contain trailing whitespace.
 
-### 5. Multi-line docstring format
+### 6. Multi-line docstring format
 
 Multi-line docstrings (spanning more than one line) must have the opening triple quote `"""` on its own line with no text following it, and the closing triple quote on its own line with no text preceding it.
 
