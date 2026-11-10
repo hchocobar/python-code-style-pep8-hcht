@@ -68,9 +68,9 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
 def check_docstring_gap(lines: list[str]) -> list[str]:
     """Check blank line after module docstring close (Rule 1).
 
-    The docstring close must be immediately followed by code. Exactly 1
-    blank line is allowed before a function/class definition, but NOT
-    before imports, comments, or expressions.
+    The docstring close must be immediately followed by code. No blank
+    lines are allowed after a docstring close, regardless of what
+    follows.
 
     Parameters
     ----------
@@ -104,13 +104,8 @@ def check_docstring_gap(lines: list[str]) -> list[str]:
                 break
             blanks = next_code - doc_close - 1
             if blanks > 0:
-                next_text = lines[next_code].strip()
-                is_def = (next_text.startswith('def ')
-                          or next_text.startswith('class ')
-                          or next_text.startswith('@'))
-                if not (is_def and blanks == 1):
-                    violations.append(
-                        f'{doc_close + 2}: Blank line after docstring close')
+                violations.append(
+                    f'{doc_close + 2}: Blank line after docstring close')
             break
     return violations
 
@@ -179,8 +174,8 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                     if gap != 1:
                         violations.append(f'{lineno}: Expected 1 blank line before method \'{child.name}\', found {gap}')
                 elif prev_was_docstring:
-                    if gap != 1:
-                        violations.append(f'{lineno}: Expected 1 blank line before top-level \'{child.name}\' after docstring, found {gap}')
+                    if gap != 0:
+                        violations.append(f'{lineno}: Expected 0 blank lines before top-level \'{child.name}\' after docstring, found {gap}')
                 else:
                     if gap != 2:
                         violations.append(f'{lineno}: Expected 2 blank lines before top-level \'{child.name}\', found {gap}')
