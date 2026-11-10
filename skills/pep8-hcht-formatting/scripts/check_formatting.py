@@ -110,6 +110,49 @@ def check_docstring_gap(lines: list[str]) -> list[str]:
     return violations
 
 
+def check_docstring_quotes(source: str) -> list[str]:
+    """Check that docstrings use triple double-quotes (Rule 3).
+
+    Triple single-quotes (''') are not allowed for docstrings.
+
+    Parameters
+    ----------
+    source : str
+        Source code as a string.
+
+    Returns
+    -------
+    list[str]
+        Violation descriptions.
+    """
+    violations: list[str] = []
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return violations
+    source_lines = source.splitlines()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+            if isinstance(node, ast.Module):
+                body = node.body
+            else:
+                body = node.body
+            if (body
+                    and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_start = body[0].lineno
+                doc_end = body[0].end_lineno or doc_start
+                for line_num in range(doc_start, doc_end + 1):
+                    line = source_lines[line_num - 1] if line_num <= len(source_lines) else ''
+                    if "'''" in line:
+                        violations.append(
+                            f'{line_num}: Docstring uses triple single-quotes '
+                            f"(''') instead of triple double-quotes (\"\"\")")
+                        break
+    return violations
+
+
 def check_blank_lines(lines: list[str]) -> list[str]:
     """Check blank line rules (Rule 1).
     Parameters
@@ -333,6 +376,7 @@ def check_file(filepath: Path) -> list[str]:
         violations.extend(check_blank_lines(lines))
         violations.extend(check_operator_whitespace(lines))
         violations.extend(check_quote_style(lines))
+        violations.extend(check_docstring_quotes(source))
     except SyntaxError as e:
         violations.append(f'Syntax error: {e}')
         return violations

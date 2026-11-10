@@ -78,6 +78,48 @@ def _insert_missing_docstring(source: str) -> str:
     return '\n'.join(lines)
 
 
+def _fix_docstring_quotes(source: str) -> str:
+    """Convert triple single-quotes to triple double-quotes in docstrings.
+
+    Parameters
+    ----------
+    source : str
+        The source code as a string.
+
+    Returns
+    -------
+    str
+        Source with docstring quotes fixed.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return source
+    lines = list(source.splitlines(keepends=True))
+    touched: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef,
+                             ast.ClassDef, ast.Module)):
+            if isinstance(node, ast.Module):
+                body = node.body
+            else:
+                body = node.body
+            if (body
+                    and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_start = body[0].lineno
+                doc_end = body[0].end_lineno or doc_start
+                for line_num in range(doc_start, doc_end + 1):
+                    if line_num in touched:
+                        continue
+                    idx = line_num - 1
+                    if idx < len(lines) and "'''" in lines[idx]:
+                        lines[idx] = lines[idx].replace("'''", '"""')
+                        touched.add(line_num)
+    return ''.join(lines)
+
+
 def _remove_blank_lines_after_docstrings(source: str) -> str:
     """Remove blank lines between the closing and the next statement.
 
@@ -260,6 +302,7 @@ def format_docstrings(source: str) -> str:
     str
         The formatted source.
     """
+    source = _fix_docstring_quotes(source)
     source = _remove_blank_lines_after_docstrings(source)
     source = _fix_multiline_docstring_format(source)
     source = _insert_missing_docstring(source)

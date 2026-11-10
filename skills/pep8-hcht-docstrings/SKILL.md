@@ -4,7 +4,7 @@ description: "Enforce NumPy-style docstrings for all functions and methods. Chec
 description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, que siga las convenciones NumPy (secciones Parameters/Returns), que no haya linea en blanco entre el docstring y el codigo siguiente, y que los docstrings multi-linea tengan las comillas triples de apertura y cierre en sus propias lineas."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.2"
+  version: "1.3"
   collection: python-code-style-pep8-hcht
 ---
 

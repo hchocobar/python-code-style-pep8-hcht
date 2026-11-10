@@ -4,7 +4,7 @@ description: "Enforce consistent formatting rules: blank lines between functions
 description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, sin lineas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.3"
+  version: "1.4"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -90,8 +90,7 @@ Use **single quotes** for all strings, f-strings, and dictionary keys.
 Double quotes are only allowed when the string contains an internal single
 quote that would require escaping.
 
-Docstrings may use triple double-quotes or triple single-quotes following
-PEP 257 conventions.
+Docstrings must use triple double-quotes (`"""`). Triple single-quotes (`'''`) are rejected for docstrings. Single-line and inline strings still follow Rule 3 above.
 
 ```python
 # Correct
