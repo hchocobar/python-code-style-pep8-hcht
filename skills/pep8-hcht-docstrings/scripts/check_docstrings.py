@@ -120,12 +120,14 @@ def _check_multiline_docstring_format(
     source: str,
     lineno: int,
 ) -> list[str]:
-    """Check that multi-line docstrings have \"\"\" on their own lines.
+    """Check docstring formatting: triple double-quotes only.
 
     Multi-line docstrings must have the opening triple quote on its own
     line (no text after it) and the closing triple quote on its own line
     (no text before it). Single-line docstrings (e.g. \"\"\"text\"\"\" on
     one line) are exempt.
+
+    Triple single-quotes (''') are rejected for docstrings.
 
     Parameters
     ----------
@@ -141,17 +143,31 @@ def _check_multiline_docstring_format(
     """
     violations: list[str] = []
     source_lines = source.split('\n')
-    # Find the first line containing """
+    # Find the first line containing \"\"\" or '''
     docstart_line = lineno
+    quote_type = None
     for i in range(lineno - 1, len(source_lines)):
         if '"""' in source_lines[i]:
             docstart_line = i + 1
+            quote_type = '"""'
             break
+        if "'''" in source_lines[i]:
+            docstart_line = i + 1
+            quote_type = "'''"
+            break
+    if quote_type is None:
+        return violations
     first_line = source_lines[docstart_line - 1]
+    # Reject triple single-quotes
+    if quote_type == "'''":
+        violations.append(
+            f'{docstart_line}: Docstring uses triple single-quotes '
+            f"(''') instead of triple double-quotes (\"\"\")")
+        return violations
     triple_count = first_line.count('"""')
-    # Single-line docstring: """text""" all on one line, no newlines inside
+    # Single-line docstring: \"\"\"text\"\"\" all on one line, no newlines inside
     if triple_count >= 2 and first_line.strip().endswith('"""'):
-        # """text""" on one line — exempt, no violation
+        # \"\"\"text\"\"\" on one line — exempt, no violation
         return violations
     # Multi-line docstring: check opening format
     stripped_first = first_line.strip()
