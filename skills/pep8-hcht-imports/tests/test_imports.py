@@ -66,18 +66,6 @@ class TestChecker:
         violations = check_source(source)
         assert any('relative' in v for v in violations)
 
-    def test_import_group_order_is_reported(self) -> None:
-        """Verify that wrong group order is reported."""
-        source = 'import requests\n\nimport os\n'
-        violations = check_source(source)
-        assert any('stdlib' in v and 'before' in v for v in violations)
-
-    def test_alphabetical_order_is_reported(self) -> None:
-        """Verify that unsorted imports are reported."""
-        source = 'import sys\nimport os\n'
-        violations = check_source(source)
-        assert any('alphabetical' in v for v in violations)
-
     def test_syntax_error_returns_empty(self) -> None:
         """Verify that syntax errors don't crash the checker."""
         violations = check_source('import os broken syntax\n')
@@ -88,6 +76,71 @@ class TestChecker:
         """Verify that code without imports has no violations."""
         source = 'x = 1\n'
         assert check_source(source) == []
+
+    # --- Group count tests ---
+
+    def test_single_group_is_reported(self) -> None:
+        """Verify that 1 import block is a violation."""
+        source = 'import os\nimport sys\nimport requests\n'
+        violations = check_source(source)
+        assert any('split into at least 2 groups' in v for v in violations)
+
+    def test_two_groups_valid(self) -> None:
+        """Verify that 2 groups with stdlib first passes."""
+        source = 'import os\nimport sys\n\nimport requests\n'
+        violations = check_source(source)
+        group_violations = [v for v in violations
+                            if 'group' in v or 'stdlib' in v]
+        assert group_violations == []
+
+    def test_two_groups_stdlib_second_is_violation(self) -> None:
+        """Verify that 2 groups with stdlib second is a violation."""
+        source = 'import requests\n\nimport os\n'
+        violations = check_source(source)
+        assert any('first import group' in v and 'stdlib' in v
+                    for v in violations)
+
+    def test_two_groups_stdlib_in_both_is_violation(self) -> None:
+        """Verify that stdlib in group 2 is a violation."""
+        source = 'import os\n\nimport sys\n'
+        violations = check_source(source)
+        assert any('stdlib imports are only allowed in the first group'
+                    in v for v in violations)
+
+    def test_three_groups_valid(self) -> None:
+        """Verify that 3 groups with stdlib first passes."""
+        source = ('import os\nimport sys\n\n'
+                  'import requests\n\n'
+                  'from mypackage import helper\n')
+        violations = check_source(source)
+        group_violations = [v for v in violations
+                            if 'group' in v or 'stdlib' in v]
+        assert group_violations == []
+
+    def test_four_groups_is_violation(self) -> None:
+        """Verify that 4+ groups is a violation."""
+        source = ('import os\n\nimport sys\n\n'
+                  'import requests\n\nfrom mypackage import helper\n')
+        violations = check_source(source)
+        assert any('too many import groups' in v for v in violations)
+
+    def test_single_group_with_only_stdlib(self) -> None:
+        """Verify that 1 group of only stdlib is reported."""
+        source = 'import os\nimport sys\n'
+        violations = check_source(source)
+        assert any('split into at least 2 groups' in v for v in violations)
+
+    def test_mixed_types_in_group_is_reported(self) -> None:
+        """Verify that a group with stdlib and non-stdlib is reported."""
+        source = 'import os\nimport requests\n\nimport sys\n'
+        violations = check_source(source)
+        assert any('mixed types' in v for v in violations)
+
+    def test_alphabetical_order_is_reported(self) -> None:
+        """Verify that unsorted imports are reported."""
+        source = 'import sys\nimport os\n'
+        violations = check_source(source)
+        assert any('alphabetical' in v for v in violations)
 
 
 class TestFormatter:
@@ -108,7 +161,7 @@ class TestFormatter:
         assert 'TODO' in result
 
     def test_format_source_groups_and_sorts(self) -> None:
-        """Verify that imports are grouped and sorted."""
+        """Verify that 1-block imports are grouped and sorted."""
         source = 'import sys\nimport os\n'
         result = format_source(source)
         os_pos = result.index('import os')
@@ -120,6 +173,49 @@ class TestFormatter:
         source = 'import os\nimport requests\n'
         result = format_source(source)
         assert '\n\n' in result
+
+    def test_format_preserves_two_groups(self) -> None:
+        """Verify that 2 existing groups are preserved."""
+        source = 'import os\n\nimport requests\n'
+        result = format_source(source)
+        # 1 blank line between groups + 1 trailing blank line
+        blank_lines = result.count('\n\n')
+        assert blank_lines == 2
+
+    def test_format_preserves_three_groups(self) -> None:
+        """Verify that 3 existing groups are preserved."""
+        source = ('import os\n\nimport requests\n\n'
+                  'from mypackage import helper\n')
+        result = format_source(source)
+        # 2 blank lines between groups + 1 trailing blank line
+        blank_lines = result.count('\n\n')
+        assert blank_lines == 3
+
+    def test_format_does_not_touch_four_groups(self) -> None:
+        """Verify that 4+ groups are left unchanged."""
+        source = ('import os\n\nimport sys\n\n'
+                  'import requests\n\nfrom mypackage import helper\n')
+        result = format_source(source)
+        assert result == source
+
+    def test_format_sorts_within_two_groups(self) -> None:
+        """Verify that 2 groups get sorted within each group."""
+        source = 'import sys\nimport os\n\nimport b\nimport a\n'
+        result = format_source(source)
+        os_pos = result.index('import os')
+        sys_pos = result.index('import sys')
+        assert os_pos < sys_pos
+
+    def test_format_sorts_within_three_groups(self) -> None:
+        """Verify that 3 groups get sorted within each group."""
+        source = ('import sys\nimport os\n\n'
+                  'import requests\n\n'
+                  'from mypackage import b\n'
+                  'from mypackage import a\n')
+        result = format_source(source)
+        a_pos = result.index('from mypackage import a')
+        b_pos = result.index('from mypackage import b')
+        assert a_pos < b_pos
 
     def test_format_file_returns_true_when_changed(self,
                                                    tmp_path: Path) -> None:

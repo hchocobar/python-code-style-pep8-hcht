@@ -176,7 +176,6 @@ def check_source(source: str) -> list[str]:
                     f'{node.lineno}: relative import is not allowed; '
                     f'use an absolute import instead')
     if import_nodes:
-        saw_non_stdlib = False
         groups: list[list[ast.AST]] = [[]]
         prev_node = import_nodes[0]
         groups[-1].append(prev_node)
@@ -188,7 +187,20 @@ def check_source(source: str) -> list[str]:
                 groups.append([])
             groups[-1].append(node)
             prev_node = node
-        for group in groups:
+
+        num_groups = len(groups)
+
+        # Validate group count
+        if num_groups == 1:
+            violations.append(
+                f'{groups[0][0].lineno}: imports must be split into at '
+                f'least 2 groups (stdlib and non-stdlib)')
+        elif num_groups > 3:
+            violations.append(
+                f'{groups[0][0].lineno}: too many import groups '
+                f'({num_groups}), max 3 allowed')
+
+        for i, group in enumerate(groups):
             if not group:
                 continue
             classifications: list[str] = []
@@ -196,23 +208,42 @@ def check_source(source: str) -> list[str]:
                 module_name = _get_module_name(node)
                 classifications.append(_classify_module(module_name))
             unique_class = set(classifications)
+
+            # No mixing within a single group
             if len(unique_class) > 1:
                 mixed_modules = ', '.join(
                     f'{_get_module_name(nd)} ({cls})'
                     for nd, cls in zip(group, classifications))
                 violations.append(
-                    f'{group[0].lineno}: import group contains mixed types: '
-                    f'{mixed_modules}')
-            elif len(unique_class) == 1:
-                cls = next(iter(unique_class))
-                group_type = ('stdlib' if cls == 'stdlib'
-                              else 'non_stdlib')
-                if group_type == 'stdlib' and saw_non_stdlib:
+                    f'{group[0].lineno}: import group {i + 1} contains '
+                    f'mixed types: {mixed_modules}')
+
+            # First group must be entirely stdlib
+            if i == 0:
+                if unique_class != {'stdlib'}:
+                    non_stdlib_modules = [
+                        _get_module_name(n)
+                        for n, c in zip(group, classifications)
+                        if c != 'stdlib'
+                    ]
                     violations.append(
-                        f'{group[0].lineno}: stdlib imports must '
-                        f'come before non-stdlib imports')
-                if group_type == 'non_stdlib':
-                    saw_non_stdlib = True
+                        f'{group[0].lineno}: first import group must '
+                        f'contain only stdlib modules; found: '
+                        f'{", ".join(non_stdlib_modules)}')
+            else:
+                # No stdlib allowed beyond the first group
+                if 'stdlib' in unique_class:
+                    stdlib_in_group = [
+                        _get_module_name(n)
+                        for n, c in zip(group, classifications)
+                        if c == 'stdlib'
+                    ]
+                    violations.append(
+                        f'{group[0].lineno}: stdlib imports are only '
+                        f'allowed in the first group; found: '
+                        f'{", ".join(stdlib_in_group)}')
+
+            # Alphabetical order within each group
             sorted_group = sorted(group, key=_import_sort_key)
             for actual, expected_node in zip(group, sorted_group):
                 if actual is not expected_node:
@@ -220,8 +251,9 @@ def check_source(source: str) -> list[str]:
                     expected_name = _get_module_name(expected_node)
                     if actual_name != expected_name:
                         violations.append(
-                            f"{actual.lineno}: import '{actual_name}' is out of "
-                            f"alphabetical order; expected '{expected_name}' first")
+                            f"{actual.lineno}: import '{actual_name}' is "
+                            f"out of alphabetical order; expected "
+                            f"'{expected_name}' first")
                     break
     return violations
 

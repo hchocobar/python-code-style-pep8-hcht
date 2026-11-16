@@ -85,8 +85,8 @@ def _classify_module(module_name: str) -> str:
     return 'third_party'
 
 
-def _import_string(node: ast.AST) -> str:
-    """Return the source line for an import node as a string.
+def _import_sort_key(node: ast.AST) -> tuple[str, str]:
+    """Return a sort key for an import node.
 
     Parameters
     ----------
@@ -95,24 +95,18 @@ def _import_string(node: ast.AST) -> str:
 
     Returns
     -------
-    str
-        The import line string.
+    tuple[str, str]
+        A tuple (module_name, alias_or_name) for sorting.
     """
     if isinstance(node, ast.Import):
-        names = ', '.join(
-            n.name + (f' as {n.asname}' if n.asname else '')
-            for n in node.names
-        )
-        return f'import {names}'
+        name = node.names[0].name
+        alias = node.names[0].asname or ''
+        return (name, alias)
     if isinstance(node, ast.ImportFrom):
-        level = '.' * (node.level or 0)
         module = node.module or ''
-        names = ', '.join(
-            n.name + (f' as {n.asname}' if n.asname else '')
-            for n in node.names
-        )
-        return f'from {level}{module} import {names}'
-    return ''
+        names = sorted(n.name for n in node.names)
+        return (module, ', '.join(names))
+    return ('', '')
 
 
 def _import_lines(node: ast.AST) -> list[str]:
@@ -147,47 +141,94 @@ def _import_lines(node: ast.AST) -> list[str]:
     return []
 
 
-def _compact_imports(import_nodes: list[ast.AST]) -> list[str]:
-    """Format import nodes into properly grouped strings.
+def _detect_groups(source: str,
+                   import_nodes: list[ast.AST]) -> list[list[ast.AST]]:
+    """Detect import groups by blank line gaps in the source.
+
+    Parameters
+    ----------
+    source : str
+        The original source code.
+    import_nodes : list[ast.AST]
+        Import nodes in file order.
+
+    Returns
+    -------
+    list[list[ast.AST]]
+        Groups of import nodes as they appear in the source.
+    """
+    if not import_nodes:
+        return []
+    groups: list[list[ast.AST]] = [[import_nodes[0]]]
+    prev_node = import_nodes[0]
+    for node in import_nodes[1:]:
+        prev_line = prev_node.end_lineno or prev_node.lineno
+        current_line = node.lineno
+        gap = current_line - prev_line
+        if gap > 1:
+            groups.append([])
+        groups[-1].append(node)
+        prev_node = node
+    return groups
+
+
+def _format_lines(lines: list[str]) -> str:
+    """Ensure a list of import lines ends with a trailing blank line.
+
+    Parameters
+    ----------
+    lines : list[str]
+        Import lines to format.
+
+    Returns
+    -------
+    str
+        The formatted output with trailing newline and blank line.
+    """
+    result = '\n'.join(lines)
+    if not result.endswith('\n\n'):
+        result = result.rstrip('\n') + '\n\n'
+    return result
+
+
+def _format_single_group(import_nodes: list[ast.AST]) -> list[str]:
+    """Split a single import block into 2 groups (stdlib / non-stdlib).
 
     Parameters
     ----------
     import_nodes : list[ast.AST]
-        The import nodes to format.
+        All import nodes in the file.
 
     Returns
     -------
     list[str]
-        Formatted import strings with blank line separators
-        between groups.
+        Formatted import lines with group separation.
     """
-    groups: dict[str, list[ast.AST]] = {
-        'stdlib': [],
-        'non_stdlib': [],
-    }
-
+    stdlib_nodes: list[ast.AST] = []
+    non_stdlib_nodes: list[ast.AST] = []
     for node in import_nodes:
         module_name = _get_module_name(node)
         cls = _classify_module(module_name)
         if cls == 'stdlib':
-            groups['stdlib'].append(node)
+            stdlib_nodes.append(node)
         else:
-            groups['non_stdlib'].append(node)
+            non_stdlib_nodes.append(node)
 
-    # Sort within each group
-    for cls in groups:
-        groups[cls].sort(
-            key=lambda n: (_get_module_name(n), str(n.lineno))
-        )
+    stdlib_nodes.sort(key=_import_sort_key)
+    non_stdlib_nodes.sort(key=_import_sort_key)
 
-    # Build output
     output: list[str] = []
-    for cls in ['stdlib', 'non_stdlib']:
-        if not groups[cls]:
-            continue
-        if output:
-            output.append('')
-        for node in groups[cls]:
+    for node in stdlib_nodes:
+        for import_line in _import_lines(node):
+            if 'import *' in import_line:
+                import_line = import_line.replace(
+                    'import *',
+                    'import *  # TODO: replace wildcard import'
+                )
+            output.append(import_line)
+    if non_stdlib_nodes:
+        output.append('')
+        for node in non_stdlib_nodes:
             for import_line in _import_lines(node):
                 if 'import *' in import_line:
                     import_line = import_line.replace(
@@ -195,12 +236,45 @@ def _compact_imports(import_nodes: list[ast.AST]) -> list[str]:
                         'import *  # TODO: replace wildcard import'
                     )
                 output.append(import_line)
+    return output
 
+
+def _format_multi_group(groups: list[list[ast.AST]]) -> list[str]:
+    """Format 2-3 groups preserving structure, sorting within each.
+
+    Parameters
+    ----------
+    groups : list[list[ast.AST]]
+        Existing import groups (2 or 3).
+
+    Returns
+    -------
+    list[str]
+        Formatted import lines preserving group count.
+    """
+    output: list[str] = []
+    for i, group in enumerate(groups):
+        if i > 0:
+            output.append('')
+        sorted_group = sorted(group, key=_import_sort_key)
+        for node in sorted_group:
+            for import_line in _import_lines(node):
+                if 'import *' in import_line:
+                    import_line = import_line.replace(
+                        'import *',
+                        'import *  # TODO: replace wildcard import'
+                    )
+                output.append(import_line)
     return output
 
 
 def format_source(source: str) -> str:
     """Apply import style corrections to source code.
+
+    Behaviour:
+    - 0-1 import groups: split into 2 (stdlib / non-stdlib).
+    - 2-3 import groups: preserve group count, sort within each.
+    - 4+ import groups: return unchanged (checker will flag it).
 
     Parameters
     ----------
@@ -222,29 +296,37 @@ def format_source(source: str) -> str:
     if not import_nodes:
         return source
 
-    new_imports = _compact_imports(import_nodes)
+    groups = _detect_groups(source, import_nodes)
+    num_groups = len(groups)
+
+    if num_groups >= 4:
+        # Don't touch 4+ groups — checker will flag them
+        return source
+
+    if num_groups <= 1:
+        new_imports = _format_single_group(import_nodes)
+    else:
+        new_imports = _format_multi_group(groups)
+
     if not new_imports:
         return source
 
     lines = source.splitlines()
     first_import_lineno = import_nodes[0].lineno - 1
     last_import_lineno = (import_nodes[-1].end_lineno
-                           or import_nodes[-1].lineno)
+                          or import_nodes[-1].lineno)
 
     # Find the end of all import-related code
     body_end = last_import_lineno
     while body_end < len(lines) and lines[body_end].strip() == '':
         body_end += 1
 
-    # Reconstruct: imports + after imports
+    # Reconstruct: before imports + new imports + after imports
     before = lines[:first_import_lineno]
     after = lines[body_end:]
 
     result_lines = before + new_imports + after
-    result = '\n'.join(result_lines)
-    if not result.endswith('\n\n'):
-        result = result.rstrip('\n') + '\n\n'
-    return result
+    return _format_lines(result_lines)
 
 
 def format_file(filepath: Path) -> bool:
