@@ -64,7 +64,7 @@ result = calculate_total(
 
 # Incorrect — single-argument hanging indent
 violations.append(
-    "Long message that should be on one line")
+    'Long message that should be on one line')
 ```
 
 ### 3. Chained method calls (fluent API)
@@ -110,12 +110,12 @@ Closing bracket goes at the END of the last item, not on its own line.
 
 ```python
 # Correct
-config = {host: "localhost",
+config = {host: 'localhost',
           port: 8080,
           debug: False}
 
 # Incorrect — closing bracket on its own line
-config = {host: "localhost",
+config = {host: 'localhost',
           port: 8080,
           debug: False,
           }
@@ -132,18 +132,18 @@ line length restriction, so this always works.
 
 ```python
 # Correct — single-line call with long string
-violations.append(f"{i + 1}: Long message that describes the violation")
+violations.append(f'{i + 1}: Long message that describes the violation')
 
 # Correct — assignment (string is on one line)
-message = "User requested password reset at 2026-09-24T15:30:00Z"
+message = 'User requested password reset at 2026-09-24T15:30:00Z'
 
 # Incorrect — split string with implicit concatenation
-message = ("Lorem ipsum dolor sit amet "
-           "consectetur adipiscing elit")
+message = ('Lorem ipsum dolor sit amet '
+           'consectetur adipiscing elit')
 
 # Incorrect — hanging indent with string (violates Rule 2 and Rule 6)
 violations.append(
-    "Split string with hanging indent")
+    'Split string with hanging indent')
 ```
 
 ### 7. If/for/with/while multi-line
@@ -156,7 +156,7 @@ delimiter, same as Rule 2.
 # Correct — aligned with first element after `(`
 if (user.is_active
     and not user.is_banned
-    and user.role == "admin"):
+    and user.role == 'admin'):
     grant_access()
 
 # Correct — list comprehension
@@ -168,7 +168,7 @@ active_users = [user
 # Incorrect — hanging indent (continuation not aligned with content)
 if (user.is_active
         and not user.is_banned
-        and user.role == "admin"):
+        and user.role == 'admin'):
     grant_access()
 ```
 
