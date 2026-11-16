@@ -32,20 +32,35 @@ import os, sys
 
 ### 2. Import groups in order
 
-Imports must be grouped in the following order, separated by a single
-blank line between groups:
+Imports must be grouped by type, separated by **exactly one blank line**
+between groups.
 
-1. Standard library imports
-2. Non-stdlib imports (third-party and local application)
+- **Minimum:** 2 groups — standard library first, then everything else.
+- **Maximum:** 3 groups — standard library, third-party, and local application.
+- 4 or more groups are **not allowed**.
+
+The **first group must always be stdlib**. If you only have one import block
+(no blank lines between imports), the formatter will split it into 2 groups.
+
+When 3 groups are present, the scripts verify only that the first group is
+stdlib — groups 2 and 3 are preserved as-is without type validation.
 
 ```python
-# Correct
+# Correct — 2 groups (stdlib / non-stdlib)
+import os
+import sys
+
+import requests
+from mypackage import helper
+
+# Correct — 3 groups (stdlib / third-party / local)
 import os
 import sys
 
 import requests
 
 from mypackage import helper
+from mypackage.processor import DataProcessor
 
 # Incorrect — no blank line between groups
 import os
@@ -57,6 +72,15 @@ from mypackage import helper
 import requests
 
 import os
+
+# Incorrect — 4 groups
+import os
+
+import sys
+
+import requests
+
+from mypackage import helper
 ```
 
 ### 3. Absolute imports preferred
@@ -127,6 +151,10 @@ import re
   import into multiple `from` lines (e.g. `from os import path, walk`
   stays as one line). Manual review may be needed for long import
   lists.
+- The checker validates group count (1 = violation, 2-3 = valid,
+  4+ = violation) and that the first group is stdlib. With 3 groups,
+  it does not validate the content of groups 2 and 3 — the developer
+  is responsible for keeping them logically consistent.
 
 ## Validation
 
