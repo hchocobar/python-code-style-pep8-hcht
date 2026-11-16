@@ -12,6 +12,9 @@ from check_docstrings import (
     _is_numpy_docstring,
     _check_no_blank_after_docstring,
     _check_multiline_docstring_format,
+    _get_function_args,
+    _parse_parameter_names,
+    _check_parameters_documented,
     check_docstrings,
 )
 from format_docstrings import (
@@ -488,3 +491,211 @@ class TestEdgeCases:
             'Nested function should require a docstring, '
             + 'got violations: ' + str(violations)
         )
+
+
+# ---------------------------------------------------------------------------
+# Tests for _get_function_args
+# ---------------------------------------------------------------------------
+
+class TestGetFunctionArgs:
+    """Tests for the _get_function_args helper."""
+
+    def _parse(self, source: str) -> ast.AST:
+        """Helper to parse source and return first function node."""
+        tree = ast.parse(source)
+        return tree.body[0]
+
+    def test_regular_args(self) -> None:
+        """Verify regular args are extracted."""
+        node = self._parse('def foo(a, b, c): pass')
+        assert _get_function_args(node) == ['a', 'b', 'c']
+
+    def test_excludes_self(self) -> None:
+        """Verify self is excluded."""
+        node = self._parse('def method(self, x, y): pass')
+        assert _get_function_args(node) == ['x', 'y']
+
+    def test_excludes_cls(self) -> None:
+        """Verify cls is excluded."""
+        node = self._parse('def classmethod(cls, x): pass')
+        assert _get_function_args(node) == ['x']
+
+    def test_no_args(self) -> None:
+        """Verify empty list for no args."""
+        node = self._parse('def foo(): pass')
+        assert _get_function_args(node) == []
+
+    def test_only_self(self) -> None:
+        """Verify empty list when only self."""
+        node = self._parse('def method(self): pass')
+        assert _get_function_args(node) == []
+
+    def test_kwonly_args(self) -> None:
+        """Verify keyword-only args are included."""
+        node = self._parse('def foo(*, a, b): pass')
+        assert 'a' in _get_function_args(node)
+        assert 'b' in _get_function_args(node)
+
+    def test_vararg_and_kwarg(self) -> None:
+        """Verify *args and **kwargs are included."""
+        node = self._parse('def foo(*args, **kwargs): pass')
+        args = _get_function_args(node)
+        assert 'args' in args
+        assert 'kwargs' in args
+
+
+# ---------------------------------------------------------------------------
+# Tests for _parse_parameter_names
+# ---------------------------------------------------------------------------
+
+class TestParseParameterNames:
+    """Tests for the _parse_parameter_names helper."""
+
+    def test_returns_names(self) -> None:
+        """Verify parameter names are extracted."""
+        doc = ('Do something.\n'
+               '\n'
+               'Parameters\n'
+               '----------\n'
+               'a : int\n'
+               '    Description.\n'
+               'b : str\n'
+               '    Description.\n')
+        result = _parse_parameter_names(doc)
+        assert result == ['a', 'b']
+
+    def test_no_parameters_section(self) -> None:
+        """Verify None when no Parameters section."""
+        doc = 'Do something.\n'
+        assert _parse_parameter_names(doc) is None
+
+    def test_empty_parameters_section(self) -> None:
+        """Verify empty list when Parameters has no params."""
+        doc = ('Do something.\n'
+               '\n'
+               'Parameters\n'
+               '----------\n')
+        result = _parse_parameter_names(doc)
+        assert result == []
+
+    def test_ignores_returns_section(self) -> None:
+        """Verify it stops at the next section."""
+        doc = ('Do something.\n'
+               '\n'
+               'Parameters\n'
+               '----------\n'
+               'a : int\n'
+               '    Description.\n'
+               '\n'
+               'Returns\n'
+               '-------\n'
+               'int\n'
+               '    The result.\n')
+        result = _parse_parameter_names(doc)
+        assert result == ['a']
+
+
+# ---------------------------------------------------------------------------
+# Tests for _check_parameters_documented
+# ---------------------------------------------------------------------------
+
+class TestCheckParametersDocumented:
+    """Tests for the parameter documentation checker."""
+
+    def _make_func(self, source: str) -> ast.AST:
+        """Helper: parse source and return first FunctionDef node."""
+        tree = ast.parse(source)
+        return tree.body[0]
+
+    def test_all_params_documented(self) -> None:
+        """Verify no violation when all params are documented."""
+        node = self._make_func(
+            'def add(a, b):\n'
+            + '    """Do something.\n'
+            + '\n'
+            + '    Parameters\n'
+            + '    ----------\n'
+            + '    a : int\n'
+            + '        First.\n'
+            + '    b : int\n'
+            + '        Second.\n'
+            + '    """\n'
+            + '    return a + b')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert violations == []
+
+    def test_missing_parameters_section(self) -> None:
+        """Verify violation when Parameters section is missing."""
+        node = self._make_func(
+            'def add(a, b):\n'
+            + '    """Do something."""\n'
+            + '    return a + b')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert len(violations) == 1
+        assert 'Missing Parameters section' in violations[0]
+
+    def test_missing_one_param(self) -> None:
+        """Verify violation when a param is not documented."""
+        node = self._make_func(
+            'def divide(num, den):\n'
+            + '    """Do something.\n'
+            + '\n'
+            + '    Parameters\n'
+            + '    ----------\n'
+            + '    num : float\n'
+            + '        Numerator.\n'
+            + '    """\n'
+            + '    return num / den')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert len(violations) == 1
+        assert 'den' in violations[0]
+
+    def test_no_params_no_violation(self) -> None:
+        """Verify no violation when function has no params."""
+        node = self._make_func(
+            'def greet():\n'
+            + '    """Return a greeting."""\n'
+            + '    return "Hello"')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert violations == []
+
+    def test_self_only_no_violation(self) -> None:
+        """Verify no violation for method with only self."""
+        node = self._make_func(
+            'def method(self):\n'
+            + '    """Do something."""\n'
+            + '    pass')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert violations == []
+
+    def test_init_with_params(self) -> None:
+        """Verify __init__ with params needs Parameters section."""
+        node = self._make_func(
+            'def __init__(self, name):\n'
+            + '    """Initialize.\n'
+            + '\n'
+            + '    Parameters\n'
+            + '    ----------\n'
+            + '    name : str\n'
+            + '        The name.\n'
+            + '    """\n'
+            + '    self.name = name')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert violations == []
+
+    def test_init_missing_params(self) -> None:
+        """Verify __init__ with missing Parameters is flagged."""
+        node = self._make_func(
+            'def __init__(self, name):\n'
+            + '    """Initialize."""\n'
+            + '    self.name = name')
+        violations = _check_parameters_documented(
+            node, ast.get_docstring(node))
+        assert len(violations) == 1
+        assert 'name' in violations[0]
