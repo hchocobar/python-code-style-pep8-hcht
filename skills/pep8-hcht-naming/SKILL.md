@@ -51,7 +51,7 @@ Module-level names assigned with uppercase letters and underscores are treated a
 # Correct
 MAX_RETRIES = 3
 DEFAULT_TIMEOUT = 30
-API_BASE_URL = "https://api.example.com"
+API_BASE_URL = 'https://api.example.com'
 
 # Incorrect
 max_retries = 3             # Should be UPPER_SNAKE_CASE
