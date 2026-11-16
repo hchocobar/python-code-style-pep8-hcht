@@ -1,7 +1,7 @@
 ---
 name: pep8-hcht-docstrings
-description: "Enforce NumPy-style docstrings for all functions and methods. Checks that every function/method has a docstring, that it follows NumPy conventions (Parameters/Returns sections), that no blank line separates the docstring from the following code, and that multi-line docstrings have the opening and closing triple quotes on their own lines."
-description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, que siga las convenciones NumPy (secciones Parameters/Returns), que no haya linea en blanco entre el docstring y el codigo siguiente, y que los docstrings multi-linea tengan las comillas triples de apertura y cierre en sus propias lineas."
+description: "Enforce NumPy-style docstrings for all functions and methods. Checks that every function/method has a docstring, rejects Google-style and reST-style formats, validates section headers, and verifies that all function parameters are documented in the Parameters section."
+description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, rechaza formatos Google y reST, valida los encabezados de seccion, y verifica que todos los parametros de la funcion esten documentados en la seccion Parameters."
 compatibility: Requires Python 3.10+
 metadata:
   version: "1.3"
@@ -10,7 +10,10 @@ metadata:
 
 # Docstrings — pep8-hcht-docstrings
 
-Enforces NumPy-style docstrings for all functions and methods. Every function and method must have a docstring that documents its purpose, parameters, and return value.
+Enforces NumPy-style docstrings for all functions and methods. Every function
+and method must have a docstring that documents its purpose, parameters, and
+return value. The checker verifies that each function parameter (excluding
+``self`` and ``cls``) is listed in the ``Parameters`` section.
 
 ## Rules
 
@@ -20,7 +23,53 @@ All function and method definitions (including `__init__`) must include a docstr
 
 ### 2. NumPy docstring format only
 
-Docstrings must use the NumPy/SciPy convention. Google-style (`Args:`, `Returns:`) and reST-style (`:param`, `:return`) formats are rejected.
+Docstrings must use the NumPy/SciPy convention. Google-style (`Args:`,
+`Returns:`) and reST-style (`:param`, `:return`) formats are rejected.
+
+All function parameters (excluding ``self`` and ``cls``) must be documented
+in a ``Parameters`` section. Each parameter listed in the function signature
+must appear as a ``name : type`` entry under ``Parameters``.
+
+Functions with no parameters (after excluding ``self``/``cls``) do not need
+a ``Parameters`` section.
+
+```python
+# Correct — all parameters documented
+def add(a: int, b: int) -> int:
+    """
+    Add two numbers.
+
+    Parameters
+    ----------
+    a : int
+        First addend.
+    b : int
+        Second addend.
+    """
+    return a + b
+
+# Correct — no parameters, no Parameters section needed
+def greet() -> str:
+    """Return a greeting message."""
+    return 'Hello!'
+
+# Incorrect — missing Parameters section
+def multiply(x: float, y: float) -> float:
+    """Multiply two numbers."""
+    return x * y
+
+# Incorrect — parameter not documented
+def divide(numerator: float, denominator: float) -> float:
+    """
+    Divide two numbers.
+
+    Parameters
+    ----------
+    numerator : float
+        The numerator.
+    """
+    return numerator / denominator
+```
 
 ### 3. No blank line after the docstring
 
@@ -79,4 +128,6 @@ Single-line docstrings (e.g., `"""Short description."""`) are exempt from this r
 
 ## Validation
 
-Only check docstring style and presence, not the quality or accuracy of the documentation content.
+Only check docstring style, presence, and parameter documentation coverage.
+Do not validate the accuracy of parameter descriptions, return descriptions,
+or type annotations.

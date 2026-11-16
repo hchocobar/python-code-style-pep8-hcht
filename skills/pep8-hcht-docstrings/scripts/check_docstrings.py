@@ -189,6 +189,140 @@ def _check_multiline_docstring_format(
     return violations
 
 
+def _get_function_args(node: ast.AST) -> list[str]:
+    """Extract argument names from a function definition, excluding self/cls.
+
+    Parameters
+    ----------
+    node : ast.AST
+        An ast.FunctionDef or ast.AsyncFunctionDef node.
+
+    Returns
+    -------
+    list[str]
+        Argument names, with ``self`` and ``cls`` removed from the
+        front when present.
+    """
+    args = node.args  # type: ignore[union-attr]
+    arg_names: list[str] = []
+
+    # Positional-only args (Python 3.8+)
+    arg_names.extend(a.arg for a in args.posonlyargs)
+
+    # Regular args
+    arg_names.extend(a.arg for a in args.args)
+
+    # *args
+    if args.vararg:
+        arg_names.append(args.vararg.arg)
+
+    # Keyword-only args
+    arg_names.extend(a.arg for a in args.kwonlyargs)
+
+    # **kwargs
+    if args.kwarg:
+        arg_names.append(args.kwarg.arg)
+
+    # Exclude self/cls from the front
+    if arg_names and arg_names[0] in ('self', 'cls'):
+        arg_names = arg_names[1:]
+
+    return arg_names
+
+
+def _parse_parameter_names(docstring: str) -> list[str] | None:
+    """Parse parameter names from a NumPy-style docstring.
+
+    Looks for the ``Parameters`` section and extracts all names
+    defined as ``name : type`` lines after the section header.
+
+    Parameters
+    ----------
+    docstring : str
+        The docstring content to parse.
+
+    Returns
+    -------
+    list[str] | None
+        List of parameter names found, or ``None`` if no
+        ``Parameters`` section exists.
+    """
+    lines = docstring.split('\n')
+
+    # Locate the Parameters section
+    param_start: int | None = None
+    for i, line in enumerate(lines):
+        if line.strip() == 'Parameters':
+            if i + 1 < len(lines) and lines[i + 1].strip().startswith('---'):
+                param_start = i + 2
+                break
+
+    if param_start is None:
+        return None
+
+    param_names: list[str] = []
+    for i in range(param_start, len(lines)):
+        line = lines[i]
+        stripped = line.strip()
+
+        if not stripped:
+            continue
+
+        # Stop at the next section header (line followed by dashes)
+        if (i + 1 < len(lines)
+                and re.match(r'^-{3,}$', lines[i + 1].strip())
+                and not stripped.startswith('-')):
+            break
+
+        # Match parameter definition: ``name : type``
+        match = re.match(r'^(\w+)\s*:', stripped)
+        if match:
+            param_names.append(match.group(1))
+
+    return param_names
+
+
+def _check_parameters_documented(
+    node: ast.AST,
+    docstring: str,
+) -> list[str]:
+    """Check that all function arguments are documented in the Parameters section.
+
+    Parameters
+    ----------
+    node : ast.AST
+        An ast.FunctionDef or ast.AsyncFunctionDef node.
+    docstring : str
+        The docstring content.
+
+    Returns
+    -------
+    list[str]
+        Violation descriptions for any missing parameters.
+    """
+    violations: list[str] = []
+    arg_names = _get_function_args(node)
+
+    if not arg_names:
+        return violations  # Nothing to document
+
+    doc_params = _parse_parameter_names(docstring)
+
+    if doc_params is None:
+        violations.append(
+            f'{node.lineno}: Missing Parameters section in docstring. '
+            f'Document the following parameters: {", ".join(arg_names)}')
+        return violations
+
+    for arg in arg_names:
+        if arg not in doc_params:
+            violations.append(
+                f'{node.lineno}: Parameter {arg!r} is not documented in '
+                f'the Parameters section of the docstring')
+
+    return violations
+
+
 def check_docstrings(source: str, filepath: Path) -> list[str]:
     """Check docstring conventions in Python source code.
 
@@ -227,6 +361,8 @@ def check_docstrings(source: str, filepath: Path) -> list[str]:
                 violations.extend(_check_no_blank_after_docstring(node.body))
                 violations.extend(
                     _check_multiline_docstring_format(source, node.lineno))
+                violations.extend(
+                    _check_parameters_documented(node, docstring))
     return violations
 
 
