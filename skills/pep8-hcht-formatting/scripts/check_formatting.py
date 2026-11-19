@@ -42,11 +42,14 @@ def _is_docstring_node(node: ast.AST) -> bool:
 
 
 def check_leading_blanks(lines: list[str]) -> list[str]:
-    """Check no blank lines at the start of the file (Rule 4).
+    """
+    Check no blank lines at the start of the file (Rule 4).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -66,11 +69,12 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
 
 
 def check_docstring_gap(lines: list[str]) -> list[str]:
-    """Check blank line after module docstring close (Rule 1).
+    """
+    Check blank line after module docstring close (Rule 1).
 
-    The docstring close must be immediately followed by code. Exactly 1
-    blank line is allowed before a function/class definition, but NOT
-    before imports, comments, or expressions.
+    The docstring close must be immediately followed by code. No blank
+    lines are allowed after a docstring close, regardless of what
+    follows.
 
     Parameters
     ----------
@@ -104,23 +108,65 @@ def check_docstring_gap(lines: list[str]) -> list[str]:
                 break
             blanks = next_code - doc_close - 1
             if blanks > 0:
-                next_text = lines[next_code].strip()
-                is_def = (next_text.startswith('def ')
-                          or next_text.startswith('class ')
-                          or next_text.startswith('@'))
-                if not (is_def and blanks == 1):
-                    violations.append(
-                        f'{doc_close + 2}: Blank line after docstring close')
+                violations.append(
+                    f'{doc_close + 2}: Blank line after docstring close')
             break
     return violations
 
 
+def check_docstring_quotes(source: str) -> list[str]:
+    """
+    Check that docstrings use triple double-quotes (Rule 3).
+
+    Triple single-quotes (''') are not allowed for docstrings.
+
+    Parameters
+    ----------
+    source : str
+        Source code as a string.
+
+    Returns
+    -------
+    list[str]
+        Violation descriptions.
+    """
+    violations: list[str] = []
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return violations
+    source_lines = source.splitlines()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+            if isinstance(node, ast.Module):
+                body = node.body
+            else:
+                body = node.body
+            if (body
+                    and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_start = body[0].lineno
+                doc_end = body[0].end_lineno or doc_start
+                for line_num in range(doc_start, doc_end + 1):
+                    line = source_lines[line_num - 1] if line_num <= len(source_lines) else ''
+                    if "'''" in line:
+                        violations.append(
+                            f'{line_num}: Docstring uses triple single-quotes '
+                            f"(''') instead of triple double-quotes (\"\"\")")
+                        break
+    return violations
+
+
 def check_blank_lines(lines: list[str]) -> list[str]:
-    """Check blank line rules (Rule 1).
+    """
+    Check blank line rules (Rule 1).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -145,6 +191,10 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                 violations.append(f'{len(lines)}: Expected 1 trailing blank line, found 0')
             elif trailing_blanks > 1:
                 violations.append(f'{len(lines)}: Expected 1 trailing blank line, found {trailing_blanks}')
+            elif lines[-1].rstrip('\r\n') != '':
+                violations.append(
+                    f'{len(lines)}: Trailing blank line must be empty '
+                    f'(no spaces or tabs)')
     # Check leading blanks at the start of the file
     violations.extend(check_leading_blanks(lines))
     # Check blank line after module docstring close
@@ -175,8 +225,8 @@ def check_blank_lines(lines: list[str]) -> list[str]:
                     if gap != 1:
                         violations.append(f'{lineno}: Expected 1 blank line before method \'{child.name}\', found {gap}')
                 elif prev_was_docstring:
-                    if gap != 1:
-                        violations.append(f'{lineno}: Expected 1 blank line before top-level \'{child.name}\' after docstring, found {gap}')
+                    if gap != 0:
+                        violations.append(f'{lineno}: Expected 0 blank lines before top-level \'{child.name}\' after docstring, found {gap}')
                 else:
                     if gap != 2:
                         violations.append(f'{lineno}: Expected 2 blank lines before top-level \'{child.name}\', found {gap}')
@@ -189,13 +239,16 @@ def check_blank_lines(lines: list[str]) -> list[str]:
 
 def check_function_internal_blanks(tree: ast.AST,
                                    lines: list[str]) -> list[str]:
-    """Check for blank lines inside function bodies (Rule 1).
+    """
+    Check for blank lines inside function bodies (Rule 1).
+
     Parameters
     ----------
     tree : ast.AST
         Parsed AST of the source.
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -229,11 +282,14 @@ def check_function_internal_blanks(tree: ast.AST,
 
 
 def check_operator_whitespace(lines: list[str]) -> list[str]:
-    """Check whitespace around binary operators (Rule 2).
+    """
+    Check whitespace around binary operators (Rule 2).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -287,11 +343,14 @@ def _remove_strings(line: str) -> str:
 
 
 def check_quote_style(lines: list[str]) -> list[str]:
-    """Check quote style (Rule 3): prefer single quotes.
+    """
+    Check quote style (Rule 3): prefer single quotes.
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -317,11 +376,14 @@ def check_quote_style(lines: list[str]) -> list[str]:
 
 
 def check_file(filepath: Path) -> list[str]:
-    """Analyzes file and returns list of style violations.
+    """
+    Analyzes file and returns list of style violations.
+
     Parameters
     ----------
     filepath : Path
         Path to the Python file to check.
+
     Returns
     -------
     list[str]
@@ -334,6 +396,7 @@ def check_file(filepath: Path) -> list[str]:
         violations.extend(check_blank_lines(lines))
         violations.extend(check_operator_whitespace(lines))
         violations.extend(check_quote_style(lines))
+        violations.extend(check_docstring_quotes(source))
     except SyntaxError as e:
         violations.append(f'Syntax error: {e}')
         return violations

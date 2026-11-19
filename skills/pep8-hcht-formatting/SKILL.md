@@ -1,10 +1,10 @@
 ---
 name: pep8-hcht-formatting
 description: "Enforce consistent formatting rules: blank lines between functions/classes, no leading blank lines, single spaces around binary operators, and single quotes for strings. Use when reviewing or formatting Python code to ensure readability and uniformity."
-description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, sin lineas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
+description-es: "Aplica reglas de formato consistentes: líneas en blanco entre funciones/clases, sin líneas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear código Python para garantizar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.2"
+  version: "1.4"
   collection: python-code-style-pep8-hcht
 ---
 
@@ -24,14 +24,12 @@ Methods inside a class are separated by **one blank line**.
 Do NOT use blank lines to separate logical segments within a function.
 Do NOT use blank lines to group related functions together.
 
-Between a module-level docstring and the first definition, exactly
-**one blank line** is expected. The docstring close must be followed
-immediately by the next line of code without an extra blank line:
+Do not add a blank line between a docstring and the following definition.
+The docstring close must be immediately followed by the next line of code:
 
 ```python
-# Correct — 1 blank line after docstring, then first function
+# Correct — no blank line after docstring
 """Module docstring."""
-
 def first_function() -> None:
     pass
 
@@ -46,7 +44,6 @@ def second_function() -> None:
 
 class SampleClass:
     """Class docstring."""
-
     def first_method(self) -> None:
         pass
 
@@ -55,8 +52,15 @@ class SampleClass:
 ```
 
 Always leave a trailing blank line after the last code in every `.py` file.
-The file must end with a single blank line (empty line) following the final
-newline.
+The file must end with exactly one blank line following the final newline.
+That blank line must be truly empty: spaces or tabs are not allowed.
+
+```python
+# Correct — file ends with exactly 1 empty line
+greeting = 'Hello World'
+print(greeting)
+
+```
 
 ### 2. Whitespace around binary operators
 
@@ -86,8 +90,7 @@ Use **single quotes** for all strings, f-strings, and dictionary keys.
 Double quotes are only allowed when the string contains an internal single
 quote that would require escaping.
 
-Docstrings may use triple double-quotes or triple single-quotes following
-PEP 257 conventions.
+Docstrings must use triple double-quotes (`"""`). Triple single-quotes (`'''`) are rejected for docstrings. Single-line and inline strings still follow Rule 3 above.
 
 ```python
 # Correct
@@ -128,15 +131,16 @@ def func() -> None:
 ## Review flow
 
 1. Check leading blanks: no blank lines at the start of the file.
-2. Check blank lines: 1 blank line after docstring, 2 between top-level defs/classes, 1 between methods, no blanks inside functions.
+2. Check blank lines: 0 blank lines after docstring, 2 between top-level defs/classes, 1 between methods, no blanks inside functions.
 3. Check whitespace: spaces around all binary operators.
 4. Check quotes: single quotes everywhere, double only when needed.
-5. Check trailing newline and no trailing blank lines.
+5. Check trailing newline: exactly 1 trailing blank line at the end of the file, truly empty (no spaces or tabs).
 
 ## Known limitations
 
 - The formatter (`format_formatting.py`) is best-effort. The blank-line normaliser
-  only collapses excessive blank lines and ensures a trailing newline. It does NOT
+  only collapses excessive blank lines and ensures exactly one trailing blank line
+  (an empty line after the final newline), removing trailing whitespace. It does NOT
   re-space top-level definitions to exactly 1 or 2 blank lines (context-aware AST
   analysis would be needed).
 - The checker currently reports self-violations when run against itself (mostly

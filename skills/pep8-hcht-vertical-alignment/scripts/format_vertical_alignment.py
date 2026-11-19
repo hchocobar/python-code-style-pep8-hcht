@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """Formatter script for pep8-hcht-vertical-alignment rules.
 
-Usage:
-    python format_vertical_alignment.py <file.py>
+Parameters
+----------
+sys.argv[1] : str
+    Path to the Python file to format.
+
+Returns
+-------
+int
+    Exit code 0 if formatted successfully.
 """
 import re
 import sys
@@ -10,7 +17,8 @@ from pathlib import Path
 
 
 def remove_backslash(source: str) -> str:
-    """Replace backslash continuations with parenthesized form.
+    """
+    Replace backslash continuations with parenthesized form.
     Parameters
     ----------
     source : str
@@ -51,7 +59,8 @@ def remove_backslash(source: str) -> str:
 
 
 def fix_closing_bracket(source: str) -> str:
-    """Move closing bracket from its own line to end of last item.
+    """
+    Move closing bracket from its own line to end of last item.
     Parameters
     ----------
     source : str
@@ -88,7 +97,8 @@ def fix_closing_bracket(source: str) -> str:
 
 
 def fix_operator_position(source: str) -> str:
-    """Move binary operators from end of line to start of next.
+    """
+    Move binary operators from end of line to start of next.
     Parameters
     ----------
     source : str
@@ -145,7 +155,8 @@ def fix_operator_position(source: str) -> str:
 
 
 def fix_hanging_indent(source: str) -> str:
-    """Convert hanging indent (4-space fixed) to vertical alignment.
+    """
+    Convert hanging indent (4-space fixed) to vertical alignment.
     This is a best-effort heuristic. Complex cases may need manual review.
     Parameters
     ----------
@@ -203,7 +214,8 @@ def fix_hanging_indent(source: str) -> str:
 
 
 def fix_split_strings(source: str) -> str:
-    """Rejoin split strings (implicit concatenation) into single lines.
+    """
+    Rejoin split strings (implicit concatenation) into single lines.
     Parameters
     ----------
     source : str
@@ -254,7 +266,8 @@ def fix_split_strings(source: str) -> str:
 
 
 def format_file(filepath: Path) -> bool:
-    """Applies style corrections to the given file.
+    """
+    Applies style corrections to the given file.
     Parameters
     ----------
     filepath : Path

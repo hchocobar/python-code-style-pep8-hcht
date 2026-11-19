@@ -11,18 +11,23 @@ from pathlib import Path
 
 
 def fix_blank_lines(source: str) -> str:
-    """Normalise blank lines: trailing newline, no leading blanks.
+    """
+    Normalise blank lines: trailing newline, no leading blanks.
+
     Parameters
     ----------
     source : str
         Source code to transform.
+
     Returns
     -------
     str
         Code with blank lines normalised.
     """
-    # Ensure single trailing newline followed by a blank line
-    source = source.rstrip('\n') + '\n\n'
+    # Remove trailing whitespace from every line
+    source = re.sub(r'[ \t]+(?=\n)', '', source)
+    # Ensure exactly one trailing blank line: <code>\n\n
+    source = source.rstrip() + '\n\n'
     # Collapse 3+ consecutive blank lines to 2
     source = re.sub(r'\n{4,}', '\n\n\n', source)
     # Remove leading blank lines
@@ -31,8 +36,8 @@ def fix_blank_lines(source: str) -> str:
 
 
 def fix_operator_whitespace(source: str) -> str:
-    """Add spaces around binary operators on non-string lines.
-    Parameters
+    """
+    Add spaces around binary operators on non-string lines.
     ----------
     source : str
         Source code to transform.
@@ -76,6 +81,17 @@ def _protect_strings(line: str) -> tuple[str, list[str]]:
     """Replace string literals with placeholders."""
     placeholders: list[str] = []
     def _replacer(m: re.Match) -> str:
+        """
+        TODO: Add docstring for _replacer.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         placeholder = f'__STR_{len(placeholders)}__'
         placeholders.append(m.group())
         return placeholder
@@ -92,8 +108,8 @@ def _restore_strings(line: str, placeholders: list[str]) -> str:
 
 
 def fix_quote_style(source: str) -> str:
-    """Convert double quotes to single quotes where possible.
-    Skips docstrings and strings containing an internal single quote.
+    """
+    Convert double quotes to single quotes where possible.
     Parameters
     ----------
     source : str
@@ -162,8 +178,8 @@ def _replace_double_quotes(line: str) -> str:
 
 
 def fix_docstring_gap(source: str) -> str:
-    """Remove blank line immediately after module docstring close,
-    unless followed by a function/class definition (1 blank allowed).
+    """
+    Remove blank line immediately after module docstring close,
     Parameters
     ----------
     source : str
@@ -219,8 +235,8 @@ def _item_last_line(node: ast.AST) -> int:
 
 
 def fix_internal_blanks(source: str) -> str:
-    """Remove blank lines inside function bodies (Rule 1).
-    Parameters
+    """
+    Remove blank lines inside function bodies (Rule 1).
     ----------
     source : str
         Source code to transform.
@@ -263,9 +279,51 @@ def fix_internal_blanks(source: str) -> str:
     return ''.join(lines)
 
 
-def format_file(filepath: Path) -> bool:
-    """Applies style corrections to the given file.
+def fix_docstring_quotes(source: str) -> str:
+    """
+    Convert triple single-quotes to triple double-quotes in docstrings.
     Parameters
+    ----------
+    source : str
+        Source code to transform.
+
+    Returns
+    -------
+    str
+        Code with docstring quotes fixed.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return source
+    lines = list(source.splitlines(keepends=True))
+    touched: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef,
+                             ast.ClassDef, ast.Module)):
+            if isinstance(node, ast.Module):
+                body = node.body
+            else:
+                body = node.body
+            if (body
+                    and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_start = body[0].lineno
+                doc_end = body[0].end_lineno or doc_start
+                for line_num in range(doc_start, doc_end + 1):
+                    if line_num in touched:
+                        continue
+                    idx = line_num - 1
+                    if idx < len(lines) and "'''" in lines[idx]:
+                        lines[idx] = lines[idx].replace("'''", '"""')
+                        touched.add(line_num)
+    return ''.join(lines)
+
+
+def format_file(filepath: Path) -> bool:
+    """
+    Applies style corrections to the given file.
     ----------
     filepath : Path
         Path to the Python file to format.
@@ -279,8 +337,11 @@ def format_file(filepath: Path) -> bool:
     source = fix_blank_lines(source)
     source = fix_docstring_gap(source)
     source = fix_internal_blanks(source)
+    source = fix_docstring_quotes(source)
     source = fix_operator_whitespace(source)
     source = fix_quote_style(source)
+    # Re-ensure the ending after phases that delete lines
+    source = fix_blank_lines(source)
     if source == original:
         return False
     filepath.write_text(source, encoding='utf-8')
