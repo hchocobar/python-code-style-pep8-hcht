@@ -18,8 +18,8 @@ from check_naming import (  # type: ignore[import]
 
 
 def format_file(filepath: Path) -> bool:
-    """Analyzes naming and reports suggestions.
-
+    """
+    Analyzes naming and reports suggestions.
     Parameters
     ----------
     filepath : Path

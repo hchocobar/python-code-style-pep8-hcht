@@ -11,11 +11,14 @@ from pathlib import Path
 
 
 def fix_blank_lines(source: str) -> str:
-    """Normalise blank lines: trailing newline, no leading blanks.
+    """
+    Normalise blank lines: trailing newline, no leading blanks.
+
     Parameters
     ----------
     source : str
         Source code to transform.
+
     Returns
     -------
     str
@@ -33,8 +36,8 @@ def fix_blank_lines(source: str) -> str:
 
 
 def fix_operator_whitespace(source: str) -> str:
-    """Add spaces around binary operators on non-string lines.
-    Parameters
+    """
+    Add spaces around binary operators on non-string lines.
     ----------
     source : str
         Source code to transform.
@@ -78,6 +81,17 @@ def _protect_strings(line: str) -> tuple[str, list[str]]:
     """Replace string literals with placeholders."""
     placeholders: list[str] = []
     def _replacer(m: re.Match) -> str:
+        """
+        TODO: Add docstring for _replacer.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         placeholder = f'__STR_{len(placeholders)}__'
         placeholders.append(m.group())
         return placeholder
@@ -94,8 +108,8 @@ def _restore_strings(line: str, placeholders: list[str]) -> str:
 
 
 def fix_quote_style(source: str) -> str:
-    """Convert double quotes to single quotes where possible.
-    Skips docstrings and strings containing an internal single quote.
+    """
+    Convert double quotes to single quotes where possible.
     Parameters
     ----------
     source : str
@@ -164,8 +178,8 @@ def _replace_double_quotes(line: str) -> str:
 
 
 def fix_docstring_gap(source: str) -> str:
-    """Remove blank line immediately after module docstring close,
-    unless followed by a function/class definition (1 blank allowed).
+    """
+    Remove blank line immediately after module docstring close,
     Parameters
     ----------
     source : str
@@ -221,8 +235,8 @@ def _item_last_line(node: ast.AST) -> int:
 
 
 def fix_internal_blanks(source: str) -> str:
-    """Remove blank lines inside function bodies (Rule 1).
-    Parameters
+    """
+    Remove blank lines inside function bodies (Rule 1).
     ----------
     source : str
         Source code to transform.
@@ -266,8 +280,8 @@ def fix_internal_blanks(source: str) -> str:
 
 
 def fix_docstring_quotes(source: str) -> str:
-    """Convert triple single-quotes to triple double-quotes in docstrings.
-
+    """
+    Convert triple single-quotes to triple double-quotes in docstrings.
     Parameters
     ----------
     source : str
@@ -308,8 +322,8 @@ def fix_docstring_quotes(source: str) -> str:
 
 
 def format_file(filepath: Path) -> bool:
-    """Applies style corrections to the given file.
-    Parameters
+    """
+    Applies style corrections to the given file.
     ----------
     filepath : Path
         Path to the Python file to format.

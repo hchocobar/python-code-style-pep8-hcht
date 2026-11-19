@@ -42,11 +42,14 @@ def _is_docstring_node(node: ast.AST) -> bool:
 
 
 def check_leading_blanks(lines: list[str]) -> list[str]:
-    """Check no blank lines at the start of the file (Rule 4).
+    """
+    Check no blank lines at the start of the file (Rule 4).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -66,7 +69,8 @@ def check_leading_blanks(lines: list[str]) -> list[str]:
 
 
 def check_docstring_gap(lines: list[str]) -> list[str]:
-    """Check blank line after module docstring close (Rule 1).
+    """
+    Check blank line after module docstring close (Rule 1).
 
     The docstring close must be immediately followed by code. No blank
     lines are allowed after a docstring close, regardless of what
@@ -111,7 +115,8 @@ def check_docstring_gap(lines: list[str]) -> list[str]:
 
 
 def check_docstring_quotes(source: str) -> list[str]:
-    """Check that docstrings use triple double-quotes (Rule 3).
+    """
+    Check that docstrings use triple double-quotes (Rule 3).
 
     Triple single-quotes (''') are not allowed for docstrings.
 
@@ -154,11 +159,14 @@ def check_docstring_quotes(source: str) -> list[str]:
 
 
 def check_blank_lines(lines: list[str]) -> list[str]:
-    """Check blank line rules (Rule 1).
+    """
+    Check blank line rules (Rule 1).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -231,13 +239,16 @@ def check_blank_lines(lines: list[str]) -> list[str]:
 
 def check_function_internal_blanks(tree: ast.AST,
                                    lines: list[str]) -> list[str]:
-    """Check for blank lines inside function bodies (Rule 1).
+    """
+    Check for blank lines inside function bodies (Rule 1).
+
     Parameters
     ----------
     tree : ast.AST
         Parsed AST of the source.
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -271,11 +282,14 @@ def check_function_internal_blanks(tree: ast.AST,
 
 
 def check_operator_whitespace(lines: list[str]) -> list[str]:
-    """Check whitespace around binary operators (Rule 2).
+    """
+    Check whitespace around binary operators (Rule 2).
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -329,11 +343,14 @@ def _remove_strings(line: str) -> str:
 
 
 def check_quote_style(lines: list[str]) -> list[str]:
-    """Check quote style (Rule 3): prefer single quotes.
+    """
+    Check quote style (Rule 3): prefer single quotes.
+
     Parameters
     ----------
     lines : list[str]
         Source lines with line endings preserved.
+
     Returns
     -------
     list[str]
@@ -359,11 +376,14 @@ def check_quote_style(lines: list[str]) -> list[str]:
 
 
 def check_file(filepath: Path) -> list[str]:
-    """Analyzes file and returns list of style violations.
+    """
+    Analyzes file and returns list of style violations.
+
     Parameters
     ----------
     filepath : Path
         Path to the Python file to check.
+
     Returns
     -------
     list[str]

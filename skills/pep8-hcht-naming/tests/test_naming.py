@@ -22,11 +22,33 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 
 @pytest.fixture
 def good_example() -> Path:
+    """
+    TODO: Add docstring for good_example.
+
+    Parameters
+    ----------
+    ...
+
+    Returns
+    -------
+    ...
+    """
     return EXAMPLES_DIR / "good" / "example.py"
 
 
 @pytest.fixture
 def bad_example() -> Path:
+    """
+    TODO: Add docstring for bad_example.
+
+    Parameters
+    ----------
+    ...
+
+    Returns
+    -------
+    ...
+    """
     return EXAMPLES_DIR / "bad" / "example.py"
 
 
@@ -38,6 +60,17 @@ class TestSnakeCase:
     """Tests for _is_snake_case utility."""
 
     def test_valid_snake_case(self) -> None:
+        """
+        TODO: Add docstring for test_valid_snake_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert _is_snake_case("my_variable")
         assert _is_snake_case("process_data")
         assert _is_snake_case("get_user_by_id")
@@ -46,6 +79,17 @@ class TestSnakeCase:
         assert _is_snake_case("__dunder__")
 
     def test_invalid_snake_case(self) -> None:
+        """
+        TODO: Add docstring for test_invalid_snake_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert not _is_snake_case("myVariable")
         assert not _is_snake_case("MyVariable")
         assert not _is_snake_case("MY_CONSTANT")
@@ -56,6 +100,17 @@ class TestUpperSnakeCase:
     """Tests for _is_upper_snake_case utility."""
 
     def test_valid_upper_snake_case(self) -> None:
+        """
+        TODO: Add docstring for test_valid_upper_snake_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert _is_upper_snake_case("MAX_RETRIES")
         assert _is_upper_snake_case("DEFAULT_TIMEOUT")
         assert _is_upper_snake_case("API_BASE_URL")
@@ -63,6 +118,17 @@ class TestUpperSnakeCase:
         assert _is_upper_snake_case("_PRIVATE_CONST")
 
     def test_invalid_upper_snake_case(self) -> None:
+        """
+        TODO: Add docstring for test_invalid_upper_snake_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert not _is_upper_snake_case("MaxRetries")
         assert not _is_upper_snake_case("DEFAULT_Timeout")
         assert not _is_upper_snake_case("default_timeout")
@@ -73,6 +139,17 @@ class TestPascalCase:
     """Tests for _is_pascal_case utility."""
 
     def test_valid_pascal_case(self) -> None:
+        """
+        TODO: Add docstring for test_valid_pascal_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert _is_pascal_case("DataProcessor")
         assert _is_pascal_case("HTMLParser")
         assert _is_pascal_case("HTTPConnection")
@@ -80,6 +157,17 @@ class TestPascalCase:
         assert _is_pascal_case("A")
 
     def test_invalid_pascal_case(self) -> None:
+        """
+        TODO: Add docstring for test_invalid_pascal_case.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert not _is_pascal_case("dataProcessor")
         assert not _is_pascal_case("data_processor")
         assert not _is_pascal_case("myClass")
@@ -90,6 +178,17 @@ class TestDescriptive:
     """Tests for _is_descriptive utility."""
 
     def test_descriptive_names(self) -> None:
+        """
+        TODO: Add docstring for test_descriptive_names.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert _is_descriptive("element")
         assert _is_descriptive("response")
         assert _is_descriptive("result")
@@ -101,6 +200,17 @@ class TestDescriptive:
         assert _is_descriptive("MAX_RETRIES")
 
     def test_allowed_short_names(self) -> None:
+        """
+        TODO: Add docstring for test_allowed_short_names.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert _is_descriptive("i")
         assert _is_descriptive("j")
         assert _is_descriptive("k")
@@ -111,6 +221,17 @@ class TestDescriptive:
         assert _is_descriptive("_")
 
     def test_non_descriptive_abbreviations(self) -> None:
+        """
+        TODO: Add docstring for test_non_descriptive_abbreviations.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert not _is_descriptive("elem")
         assert not _is_descriptive("resp")
         assert not _is_descriptive("tmp")
@@ -125,6 +246,17 @@ class TestDescriptive:
         assert not _is_descriptive("cli")
 
     def test_single_letter_non_allowed(self) -> None:
+        """
+        TODO: Add docstring for test_single_letter_non_allowed.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert not _is_descriptive("a")
         assert not _is_descriptive("q")
         assert not _is_descriptive("p")
@@ -351,7 +483,29 @@ class TestExampleFiles:
     """Verify example files are present."""
 
     def test_good_example_exists(self, good_example: Path) -> None:
+        """
+        TODO: Add docstring for test_good_example_exists.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert good_example.exists(), f"Missing: {good_example}"
 
     def test_bad_example_exists(self, bad_example: Path) -> None:
+        """
+        TODO: Add docstring for test_bad_example_exists.
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        ...
+        """
         assert bad_example.exists(), f"Missing: {bad_example}"

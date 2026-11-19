@@ -57,8 +57,8 @@ def _get_base_name(name: str) -> str:
 
 
 def _is_descriptive(name: str) -> bool:
-    """Check if a name is sufficiently descriptive.
-    Parameters
+    """
+    Check if a name is sufficiently descriptive.
     ----------
     name : str
         The identifier name (with underscores stripped).
@@ -96,8 +96,8 @@ def _descriptive_violation_message(lineno: int,
 
 def check_naming(source: str,
                  filepath: Path) -> list[str]:
-    """Check naming conventions in Python source code.
-    Parameters
+    """
+    Check naming conventions in Python source code.
     ----------
     source : str
         The source code as a string.

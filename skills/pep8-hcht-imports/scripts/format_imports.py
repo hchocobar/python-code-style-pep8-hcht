@@ -44,8 +44,8 @@ _STDLIB_MODULES: frozenset[str] = (
 
 
 def _get_module_name(node: ast.AST) -> str:
-    """Extract the top-level module name from an import node.
-
+    """
+    Extract the top-level module name from an import node.
     Parameters
     ----------
     node : ast.AST
@@ -65,8 +65,8 @@ def _get_module_name(node: ast.AST) -> str:
 
 
 def _classify_module(module_name: str) -> str:
-    """Classify a module as stdlib, third_party, or local.
-
+    """
+    Classify a module as stdlib, third_party, or local.
     Parameters
     ----------
     module_name : str
@@ -86,8 +86,8 @@ def _classify_module(module_name: str) -> str:
 
 
 def _import_sort_key(node: ast.AST) -> tuple[str, str]:
-    """Return a sort key for an import node.
-
+    """
+    Return a sort key for an import node.
     Parameters
     ----------
     node : ast.AST
@@ -110,8 +110,8 @@ def _import_sort_key(node: ast.AST) -> tuple[str, str]:
 
 
 def _import_lines(node: ast.AST) -> list[str]:
-    """Return one or more import lines for a given import node.
-
+    """
+    Return one or more import lines for a given import node.
     Split multi-module import statements into separate lines.
 
     Parameters
@@ -143,8 +143,8 @@ def _import_lines(node: ast.AST) -> list[str]:
 
 def _detect_groups(source: str,
                    import_nodes: list[ast.AST]) -> list[list[ast.AST]]:
-    """Detect import groups by blank line gaps in the source.
-
+    """
+    Detect import groups by blank line gaps in the source.
     Parameters
     ----------
     source : str
@@ -173,8 +173,8 @@ def _detect_groups(source: str,
 
 
 def _format_lines(lines: list[str]) -> str:
-    """Ensure a list of import lines ends with a trailing blank line.
-
+    """
+    Ensure a list of import lines ends with a trailing blank line.
     Parameters
     ----------
     lines : list[str]
@@ -192,8 +192,8 @@ def _format_lines(lines: list[str]) -> str:
 
 
 def _format_single_group(import_nodes: list[ast.AST]) -> list[str]:
-    """Split a single import block into 2 groups (stdlib / non-stdlib).
-
+    """
+    Split a single import block into 2 groups (stdlib / non-stdlib).
     Parameters
     ----------
     import_nodes : list[ast.AST]
@@ -240,8 +240,8 @@ def _format_single_group(import_nodes: list[ast.AST]) -> list[str]:
 
 
 def _format_multi_group(groups: list[list[ast.AST]]) -> list[str]:
-    """Format 2-3 groups preserving structure, sorting within each.
-
+    """
+    Format 2-3 groups preserving structure, sorting within each.
     Parameters
     ----------
     groups : list[list[ast.AST]]
@@ -269,8 +269,8 @@ def _format_multi_group(groups: list[list[ast.AST]]) -> list[str]:
 
 
 def format_source(source: str) -> str:
-    """Apply import style corrections to source code.
-
+    """
+    Apply import style corrections to source code.
     Behaviour:
     - 0-1 import groups: split into 2 (stdlib / non-stdlib).
     - 2-3 import groups: preserve group count, sort within each.
@@ -330,8 +330,8 @@ def format_source(source: str) -> str:
 
 
 def format_file(filepath: Path) -> bool:
-    """Apply import style corrections to a file.
-
+    """
+    Apply import style corrections to a file.
     Parameters
     ----------
     filepath : Path

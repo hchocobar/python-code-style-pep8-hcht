@@ -19,10 +19,32 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / 'examples'
 
 @pytest.fixture
 def good_example() -> Path:
+    """
+    TODO: Add docstring for good_example.
+
+    Parameters
+    ----------
+    ...
+
+    Returns
+    -------
+    ...
+    """
     return EXAMPLES_DIR / 'good' / 'example.py'
 
 @pytest.fixture
 def bad_example() -> Path:
+    """
+    TODO: Add docstring for bad_example.
+
+    Parameters
+    ----------
+    ...
+
+    Returns
+    -------
+    ...
+    """
     return EXAMPLES_DIR / 'bad' / 'example.py'
 
 
