@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """Checker script for pep8-hcht-vertical-alignment rules.
 
-Usage:
-    python check_vertical_alignment.py <file.py>
+Parameters
+----------
+sys.argv[1] : str
+    Path to the Python file to analyze.
+
+Returns
+-------
+int
+    Exit code 0 if no violations, 1 if violations found.
 """
 import ast
 import re
@@ -11,7 +18,18 @@ from pathlib import Path
 
 
 def check_backslash(lines: list[str]) -> list[str]:
-    """Detect backslash line continuation."""
+    """
+    Detect backslash line continuation.
+    Parameters
+    ----------
+    lines : list of str
+        Source code lines to inspect.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if clean.
+    """
     violations: list[str] = []
     for i, line in enumerate(lines):
         stripped = line.rstrip('\n').rstrip()
@@ -21,7 +39,18 @@ def check_backslash(lines: list[str]) -> list[str]:
 
 
 def check_closing_bracket_own_line(lines: list[str]) -> list[str]:
-    """Detect closing bracket on its own line."""
+    """
+    Detect closing bracket on its own line.
+    Parameters
+    ----------
+    lines : list of str
+        Source code lines to inspect.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if clean.
+    """
     violations: list[str] = []
     for i, line in enumerate(lines):
         stripped = line.rstrip('\n')
@@ -35,7 +64,18 @@ def check_closing_bracket_own_line(lines: list[str]) -> list[str]:
 
 
 def check_split_strings(lines: list[str]) -> list[str]:
-    """Detect split strings (implicit concatenation inside parentheses)."""
+    """
+    Detect split strings (implicit concatenation inside parentheses).
+    Parameters
+    ----------
+    lines : list of str
+        Source code lines to inspect.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if clean.
+    """
     violations: list[str] = []
     string_prefix = r'(?:[fFrRbBuU]+)?'
     pattern_prev = re.compile(r'["\'](?:[^"\'\\]|\\.)*["\']\s*$')
@@ -54,7 +94,18 @@ def check_split_strings(lines: list[str]) -> list[str]:
 
 
 def check_operator_at_end(lines: list[str]) -> list[str]:
-    """Detect binary operators at end of line inside parentheses."""
+    """
+    Detect binary operators at end of line inside parentheses.
+    Parameters
+    ----------
+    lines : list of str
+        Source code lines to inspect.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if clean.
+    """
     violations: list[str] = []
     operators = {'and', 'or', 'not', '+', '-', '*', '/', '//',
                  '%', '**', '==', '!=', '<', '>', '<=', '>=',
@@ -72,12 +123,34 @@ def check_operator_at_end(lines: list[str]) -> list[str]:
 
 
 def _get_indent(line_text: str) -> int:
-    """Return the number of leading spaces on a line."""
+    """
+    Return the number of leading spaces on a line.
+    Parameters
+    ----------
+    line_text : str
+        A line of source code.
+
+    Returns
+    -------
+    int
+        Number of leading spaces.
+    """
     return len(line_text) - len(line_text.lstrip())
 
 
 def _call_name(node: ast.Call) -> str:
-    """Get a human-readable name for a function call node."""
+    """
+    Get a human-readable name for a function call node.
+    Parameters
+    ----------
+    node : ast.Call
+        The AST call node to inspect.
+
+    Returns
+    -------
+    str
+        Human-readable function name (attribute name or function id).
+    """
     if isinstance(node.func, ast.Attribute):
         return str(node.func.attr)
     elif isinstance(node.func, ast.Name):
@@ -88,7 +161,23 @@ def _call_name(node: ast.Call) -> str:
 def _check_alignment(first_item, items: list, node_lineno: int,
                      lines: list[str], violations: list[str],
                      label: str) -> None:
-    """Check vertical alignment for multi-line items."""
+    """
+    Check vertical alignment for multi-line items.
+    Parameters
+    ----------
+    first_item : ast.AST
+        The first item in the multi-line construct.
+    items : list
+        All items in the construct (including first).
+    node_lineno : int
+        Line number of the parent node.
+    lines : list of str
+        Source code lines.
+    violations : list of str
+        List to append violation messages to.
+    label : str
+        Human-readable label for error messages.
+    """
     if not hasattr(first_item, 'lineno') or not hasattr(first_item, 'col_offset'):
         return
     if first_item.lineno > node_lineno:
@@ -111,7 +200,20 @@ _CONTAINER_LABELS = {ast.List: "list items", ast.Tuple: "tuple items",
 
 def check_multiline_hanging_indent(tree: ast.AST,
                                    lines: list[str]) -> list[str]:
-    """Detect hanging indent using AST analysis."""
+    """
+    Detect hanging indent using AST analysis.
+    Parameters
+    ----------
+    tree : ast.AST
+        Parsed AST of the source file.
+    lines : list of str
+        Source code lines.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if clean.
+    """
     violations: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -147,7 +249,18 @@ def check_multiline_hanging_indent(tree: ast.AST,
 
 
 def check_file(filepath: Path) -> list[str]:
-    """Analyzes file and returns list of style violations."""
+    """
+    Analyze a file and return list of style violations.
+    Parameters
+    ----------
+    filepath : Path
+        Path to the Python file to analyze.
+
+    Returns
+    -------
+    list of str
+        Violation messages found, or empty list if compliant.
+    """
     violations: list[str] = []
     source = filepath.read_text(encoding="utf-8")
     lines = source.splitlines(keepends=True)
@@ -165,7 +278,17 @@ def check_file(filepath: Path) -> list[str]:
 
 
 def main() -> None:
-    """Entry point. Reads file path from CLI args and prints violations."""
+    """
+    Entry point. Reads file path from CLI args and prints violations.
+    Parameters
+    ----------
+    sys.argv[1] : str
+        Path to the Python file to check.
+
+    Returns
+    -------
+    None
+    """
     if len(sys.argv) < 2:
         print("Usage: python check_vertical_alignment.py <file.py>")
         sys.exit(1)
