@@ -1,7 +1,7 @@
 ---
 name: pep8-hcht-naming
 description: "Enforce consistent naming conventions: snake_case for variables/functions/methods, UPPER_SNAKE_CASE for constants, PascalCase for classes, and descriptive names. Use when reviewing Python code to ensure readability and uniformity."
-description-es: "Aplica reglas de nomenclatura consistentes: snake_case para variables/funciones/metodos, UPPER_SNAKE_CASE para constantes, PascalCase para clases y nombres descriptivos. Usar al revisar codigo Python para asegurar legibilidad y uniformidad."
+description-es: "Aplica reglas de nomenclatura consistentes: snake_case para variables/funciones/métodos, UPPER_SNAKE_CASE para constantes, PascalCase para clases y nombres descriptivos. Usar al revisar código Python para asegurar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
   version: "1.0"
