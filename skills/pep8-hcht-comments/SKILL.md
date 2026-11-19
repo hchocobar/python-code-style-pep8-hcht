@@ -56,8 +56,6 @@ All comments must be written in English.
 # Calcula el promedio
 ```
 
-**Note:** The checker uses a heuristic (accented letters and common Spanish words). It can produce false positives; review manually.
-
 ### 4. No decorative comment blocks
 
 Do not use decorative blocks made of repeated symbols.
