@@ -22,8 +22,13 @@ to comply with the rules below.
 
 ### 1. Indentation: 4 spaces
 
-Use 4 spaces per indentation level. No tabs. No multiple indentation
-(8 spaces, 12 spaces, etc.). Only 4 spaces per level.
+Use **4 spaces** for each logical indentation level (blocks inside `if`,
+`for`, `def`, `class`, etc.). No tabs. No multiple indentation
+(8 spaces, 12 spaces, etc.).
+
+Vertical alignment (Rule 2) is a separate mechanism: continuation lines
+align with the opening delimiter and may use more than 4 spaces. That is
+alignment to the first element, not multiple indentation.
 
 ```python
 # Correct
