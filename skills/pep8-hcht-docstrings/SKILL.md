@@ -1,7 +1,7 @@
 ---
 name: pep8-hcht-docstrings
 description: "Enforce NumPy-style docstrings for all functions and methods. Checks that every function/method has a docstring, rejects Google-style and reST-style formats, validates section headers, and verifies that all function parameters are documented in the Parameters section."
-description-es: "Exige docstrings estilo NumPy en todas las funciones y metodos. Verifica que toda funcion/metodo tenga docstring, rechaza formatos Google y reST, valida los encabezados de seccion, y verifica que todos los parametros de la funcion esten documentados en la seccion Parameters."
+description-es: "Exige docstrings estilo NumPy en todas las funciones y métodos. Verifica que toda función/método tenga docstring, rechaza formatos Google y reST, valida los encabezados de sección, y verifica que todos los parámetros de la función estén documentados en la sección Parameters."
 compatibility: Requires Python 3.10+
 metadata:
   version: "1.3"

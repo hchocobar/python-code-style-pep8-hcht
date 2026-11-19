@@ -1,7 +1,7 @@
 ---
 name: pep8-hcht-imports
 description: "Enforce PEP 8 import rules: one import per line, group ordering (stdlib, third-party, local), absolute imports, no wildcard imports, and alphabetical sorting within groups. Use when reviewing Python code to ensure clean and consistent imports."
-description-es: "Aplica reglas PEP 8 para imports: un import por linea, orden por grupos (stdlib, terceros, local), imports absolutos, sin wildcard imports, y orden alfabetico dentro de cada grupo. Usar al revisar codigo Python para asegurar imports limpios y consistentes."
+description-es: "Aplica reglas PEP 8 para imports: un import por línea, orden por grupos (stdlib, terceros, local), imports absolutos, sin wildcard imports, y orden alfabético dentro de cada grupo. Usar al revisar código Python para asegurar imports limpios y consistentes."
 compatibility: Requires Python 3.10+
 metadata:
   version: "1.0"

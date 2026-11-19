@@ -1,7 +1,7 @@
 ---
 name: pep8-hcht-formatting
 description: "Enforce consistent formatting rules: blank lines between functions/classes, no leading blank lines, single spaces around binary operators, and single quotes for strings. Use when reviewing or formatting Python code to ensure readability and uniformity."
-description-es: "Aplica reglas de formato consistentes: lineas en blanco entre funciones/clases, sin lineas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear codigo Python para garantizar legibilidad y uniformidad."
+description-es: "Aplica reglas de formato consistentes: líneas en blanco entre funciones/clases, sin líneas en blanco al inicio, espacios alrededor de operadores binarios, y comillas simples para strings. Usar al revisar o formatear código Python para garantizar legibilidad y uniformidad."
 compatibility: Requires Python 3.10+
 metadata:
   version: "1.4"
