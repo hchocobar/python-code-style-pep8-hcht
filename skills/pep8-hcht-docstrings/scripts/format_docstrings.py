@@ -17,8 +17,8 @@ _TRIPLE_QUOTE = chr(34) * 3
 
 
 def _insert_missing_docstring(source: str) -> str:
-    """Insert placeholder NumPy-style docstrings for functions missing them.
-
+    """
+    Insert placeholder NumPy-style docstrings for functions missing them.
     Parameters
     ----------
     source : str
@@ -79,8 +79,8 @@ def _insert_missing_docstring(source: str) -> str:
 
 
 def _fix_docstring_quotes(source: str) -> str:
-    """Convert triple single-quotes to triple double-quotes in docstrings.
-
+    """
+    Convert triple single-quotes to triple double-quotes in docstrings.
     Parameters
     ----------
     source : str
@@ -121,8 +121,8 @@ def _fix_docstring_quotes(source: str) -> str:
 
 
 def _remove_blank_lines_after_docstrings(source: str) -> str:
-    """Remove blank lines between the closing and the next statement.
-
+    """
+    Remove blank lines between the closing and the next statement.
     Parameters
     ----------
     source : str
@@ -160,8 +160,8 @@ def _remove_blank_lines_after_docstrings(source: str) -> str:
 
 
 def _fix_multiline_docstring_format(source: str) -> str:
-    """Fix multi-line docstring opening/closing formatting.
-
+    """
+    Fix multi-line docstring opening/closing formatting.
     Ensures that multi-line docstrings have \"\"\" on their own lines.
 
     Parameters
@@ -290,8 +290,8 @@ def _fix_multiline_docstring_format(source: str) -> str:
 
 
 def format_docstrings(source: str) -> str:
-    """Apply docstring formatting fixes.
-
+    """
+    Apply docstring formatting fixes.
     Parameters
     ----------
     source : str

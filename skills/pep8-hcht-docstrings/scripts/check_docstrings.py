@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-"""Checker script for pep8-hcht-docstrings rules.
+"""
+Checker script for pep8-hcht-docstrings rules.
 
-Usage:
-    python check_docstrings.py <file.py>
+Parameters
+----------
+sys.argv[1] : str
+    Path to the Python file to analyze.
+
+Returns
+-------
+int
+    Exit code 0 if no violations, 1 if violations found.
 """
 import ast
 import re
@@ -11,7 +19,8 @@ from pathlib import Path
 
 
 def _get_docstring_or_none(body: list[ast.stmt]) -> str | None:
-    """Extract the docstring from a function/class body, if present.
+    """
+    Extract the docstring from a function/class body, if present.
 
     Parameters
     ----------
@@ -32,7 +41,8 @@ def _get_docstring_or_none(body: list[ast.stmt]) -> str | None:
 
 
 def _is_numpy_docstring(docstring: str) -> tuple[bool, list[str]]:
-    """Check if a docstring follows NumPy/SciPy conventions.
+    """
+    Check if a docstring follows NumPy/SciPy conventions.
 
     Parameters
     ----------
@@ -86,7 +96,8 @@ def _is_numpy_docstring(docstring: str) -> tuple[bool, list[str]]:
 
 
 def _check_no_blank_after_docstring(body: list[ast.stmt]) -> list[str]:
-    """Check no blank line after the docstring closing.
+    """
+    Check no blank line after the docstring closing.
 
     Parameters
     ----------
@@ -120,14 +131,15 @@ def _check_multiline_docstring_format(
     source: str,
     lineno: int,
 ) -> list[str]:
-    """Check docstring formatting: triple double-quotes only.
+    """
+    Check docstring formatting: triple double-quotes only.
 
     Multi-line docstrings must have the opening triple quote on its own
     line (no text after it) and the closing triple quote on its own line
-    (no text before it). Single-line docstrings (e.g. \"\"\"text\"\"\" on
+    (no text before it). Single-line docstrings (e.g. ``'''text'''`` on
     one line) are exempt.
 
-    Triple single-quotes (''') are rejected for docstrings.
+    Triple single-quotes (``'''``) are rejected for docstrings.
 
     Parameters
     ----------
@@ -190,7 +202,8 @@ def _check_multiline_docstring_format(
 
 
 def _get_function_args(node: ast.AST) -> list[str]:
-    """Extract argument names from a function definition, excluding self/cls.
+    """
+    Extract argument names from a function definition, excluding self/cls.
 
     Parameters
     ----------
@@ -231,7 +244,8 @@ def _get_function_args(node: ast.AST) -> list[str]:
 
 
 def _parse_parameter_names(docstring: str) -> list[str] | None:
-    """Parse parameter names from a NumPy-style docstring.
+    """
+    Parse parameter names from a NumPy-style docstring.
 
     Looks for the ``Parameters`` section and extracts all names
     defined as ``name : type`` lines after the section header.
@@ -286,7 +300,8 @@ def _check_parameters_documented(
     node: ast.AST,
     docstring: str,
 ) -> list[str]:
-    """Check that all function arguments are documented in the Parameters section.
+    """
+    Check that all function arguments are documented in the Parameters section.
 
     Parameters
     ----------
@@ -324,7 +339,8 @@ def _check_parameters_documented(
 
 
 def check_docstrings(source: str, filepath: Path) -> list[str]:
-    """Check docstring conventions in Python source code.
+    """
+    Check docstring conventions in Python source code.
 
     Parameters
     ----------
