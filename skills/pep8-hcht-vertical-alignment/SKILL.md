@@ -128,8 +128,9 @@ config = {host: 'localhost',
 
 ### 6. Strings are always on a single line
 
-Strings must NOT be split across multiple lines. Implicit string
-concatenation inside parentheses is PROHIBITED.
+Code strings must NOT be split across multiple lines. This rule applies
+to string literals used in expressions and assignments, not to docstrings.
+Implicit string concatenation inside parentheses is PROHIBITED.
 
 When a string argument is too long to fit on the same line as the
 function call, put the ENTIRE call on a single line. There is no
